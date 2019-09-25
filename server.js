@@ -51,12 +51,12 @@ app.post("/api/search", (req, res) => {
 
 })
 app.get("/api/showUpload", (req,res) => {
-  // return res.json({data: []})
-  // const data = [{id:57230500060,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"success"},
-  // {id:59230500045,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"exception"},
-  // {id:59230500068,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"success"},
-  // {id:59230500072,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"exception"}]
-  // res.json(data);
+  return res.json({data: []})
+  const data = [{id:57230500060,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"success"},
+  {id:59230500045,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"exception"},
+  {id:59230500068,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"success"},
+  {id:59230500072,filename:"SIT-IT-Transcript.xlsx",percent:100,status:"exception"}]
+  res.json(data);
 })
 
 
