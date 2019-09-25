@@ -170,7 +170,7 @@ app.post("/api/upload",upload.array('excelFile'),(req,res) => {
 
 })
 
-app.listen(process.env.PORT || 6020, 'localhost', () => {
+app.listen(process.env.PORT || 6020, '*' , () => {
   //isConnectedBlockchain();
   console.log("Server Running at localhost:6020");
 })
