@@ -126,7 +126,7 @@ app.post("/api/verifyQRCode",(req,res)=>{
     if(jsonData !== '' || jsonData.length != 0){
       res.json({fetchResult:jsonData});
     }else{
-      res.json({fetchResult:"failed"})
+      res.json({fetchResult:false})
     }
     
   })()
