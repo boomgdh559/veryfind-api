@@ -22,7 +22,7 @@ const path = './Transcript.json';
 
 // var workSheet = workBook.SheetNames;
 
-// var data = xlsx.utils.sheet_to_json(workBook.Sheets[workSheet[0]]);
+//var data = xlsx.utils.sheet_to_json(workBook.Sheets[workSheet[0]]);
 
 convertExcelToJSON = (file) => {
     workBook = xlsx.readFile(file);
@@ -99,6 +99,7 @@ dataJSON = (file) => {
 module.exports.convertToJSON = (file) => {
     return dataJSON(file);
 }
+
 
 
 
