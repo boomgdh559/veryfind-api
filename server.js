@@ -107,6 +107,33 @@ app.post("/api/fetchTranscript",(req,res)=>{
 
 })
 
+app.post("/api/verifyQRCode",(req,res)=>{
+  verifyTranscript = async(address) => {
+    const data = await transcript.methods.verifyQRCode(address).call((err, res) => {
+      if (!err) {
+        //console.log(typeof res);
+        return res;
+      } else {
+        console.log(err);
+      }
+    });
+    return data;
+  }
+
+  (async() => {
+    console.log("Address : ",req.body.verifyAddress.toString())
+    const jsonData = await verifyTranscript(req.body.verifyAddress);
+    if(jsonData !== '' || jsonData.length != 0){
+      res.json({fetchResult:jsonData});
+    }else{
+      res.json({fetchResult:"failed"})
+    }
+    
+  })()
+
+})
+
+
 app.post("/api/upload",upload.array('excelFile'),(req,res) => {
 
   const allFile = req.files;
