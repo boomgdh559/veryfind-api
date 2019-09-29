@@ -27,10 +27,8 @@ const path = './Transcript.json';
 convertExcelToJSON = (file) => {
     workBook = xlsx.readFile(file);
     workSheet = workBook.SheetNames;
-    var dataExcel = workSheet.map((worksheet) => {
-        data = xlsx.utils.sheet_to_json(workBook.Sheets[worksheet]);
-        return data;
-    })
+    rawFile = xlsx.utils.sheet_to_json(workBook.Sheets[workSheet[0]]);
+    dataExcel = formatterJSON(rawFile);
     return dataExcel;
 }
 
@@ -94,9 +92,7 @@ formatterJSON = (data) => {
 }
 
 dataJSON = (file) => {
-    convertData = (convertExcelToJSON(file)).map((data) => {
-        return formatterJSON(data);
-    })
+    convertData = convertExcelToJSON(file)
     return convertData;
 }
 

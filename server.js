@@ -59,6 +59,53 @@ app.get("/api/showUpload", (req,res) => {
   res.json(data);
 })
 
+app.post("/api/update",(req,res)=>{
+  var id = parseInt(req.body.id);
+  var jsonData = req.body.jsonData;
+  //console.log("Id: "+id+" JSON : "+jsonData)
+  updateTranscript = async(id,jsonData) => {
+    account = await web3.eth.getAccounts();
+    try{
+      await transcript.methods.editJSONTranscript(id,jsonData).send({from:account[0]},(err)=>{
+        if(!err){
+          res.json({updateStatus:true});
+          console.log("success")
+        }else{
+          res.json({updateStatus:false});
+        }
+      })
+    }catch(err){
+      console.log(err);
+    }
+  }
+  updateTranscript(id,jsonData);
+})
+
+app.post("/api/fetchTranscript",(req,res)=>{
+  var id = req.body.searchId;
+  fetchTranscript = async(id) => {
+    const data = await transcript.methods.showJSONTranscript(id).call((err, res) => {
+      if (!err) {
+        //console.log(typeof res);
+        return res;
+      } else {
+        console.log(err);
+      }
+    });
+    return data;
+  }
+
+  (async() => {
+    const jsonData = await fetchTranscript(id);
+    if(jsonData !== '' || jsonData.length != 0){
+      res.json({fetchResult:jsonData});
+    }else{
+      res.json({fetchResult:"failed"})
+    }
+    
+  })()
+
+})
 
 app.post("/api/upload",upload.array('excelFile'),(req,res) => {
 
@@ -73,13 +120,13 @@ app.post("/api/upload",upload.array('excelFile'),(req,res) => {
       pathFile = file.path;
       jsonFile = dataJSON.convertToJSON(pathFile);
       jsonData.push(jsonFile)
-      if(index > 0){
-        jsonData = jsonData[index-1].concat(jsonData[index]);
-      }
+      // if(index > 0){
+      //   jsonData = jsonData[index-1].concat(jsonData[index]);
+      // }
 
     })
-    //console.log(jsonData)
-    //console.log(jsonData.map((data,index)=>data[index].studentId))
+    // console.log(jsonData)
+    // console.log(jsonData.map((data,index)=>data.studentId))
     
     deleteExcelFile = (file) => {
       fs.unlink(file.path, (err) => {
