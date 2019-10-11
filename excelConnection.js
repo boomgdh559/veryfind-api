@@ -24,16 +24,16 @@ const path = './Transcript.json';
 
 //var data = xlsx.utils.sheet_to_json(workBook.Sheets[workSheet[0]]);
 
-convertExcelToJSON = (file) => {
+convertExcelToJSON = (file,university) => {
     workBook = xlsx.readFile(file);
     workSheet = workBook.SheetNames;
     rawFile = xlsx.utils.sheet_to_json(workBook.Sheets[workSheet[0]]);
-    dataExcel = formatterJSON(rawFile);
+    dataExcel = formatterJSON(rawFile,university);
     return dataExcel;
 }
 
 
-formatterJSON = (data) => {
+formatterJSON = (data,university) => {
 
     var jsonString = JSON.stringify(data);
     
@@ -71,16 +71,16 @@ formatterJSON = (data) => {
 
     })
 
-    fetchStudentId = () => {
+    fetchStudentId = (university) => {
 
         jsonGeneral = "{" + generalData + "}";
         studentId = JSON.parse(jsonGeneral).studentID;
-        header = JSON.stringify("KMUTT_Transcript_" + studentId);
+        header = JSON.stringify(university+"_Transcript_" + studentId);
         return header;
 
     }
 
-    allTranscriptJSON = "{" + fetchStudentId() + ":{" + generalData + ",\"semester\" : [" + allSemester + "]}}"
+    allTranscriptJSON = "{" + fetchStudentId(university) + ":{" + generalData + ",\"semester\" : [" + allSemester + "]}}"
     jsonGeneral = "{" + generalData + "}";
     id = JSON.parse(jsonGeneral).studentID;
     name = JSON.parse(jsonGeneral).name;
@@ -91,8 +91,8 @@ formatterJSON = (data) => {
     return {studentId:id,studentName:name,studentDegree : degree,studentGPA: gpa,studentDateGrad:date,studentJSONData : allTranscriptJSON};
 }
 
-dataJSON = (file) => {
-    convertData = convertExcelToJSON(file)
+dataJSON = (file,university) => {
+    convertData = convertExcelToJSON(file,university)
     return convertData;
 }
 
@@ -100,6 +100,9 @@ module.exports.convertToJSON = (file) => {
     return dataJSON(file);
 }
 
+// var json = JSON.parse((dataJSON('./ExcelFile/SIT-IT-Transcript.xlsx',"KMUTT")).studentJSONData);
+// var jsonCourse = json["KMUTT_Transcript_57130500060"].semester;
+// console.log(jsonCourse.map((data)=>data.semesterDetail.course));
 
 
 
