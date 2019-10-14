@@ -1,6 +1,5 @@
 const xlsx = require("xlsx");
-const fs = require('fs');
-const path = './Transcript.json';
+
 
 
 // fs.readFile(path, (err, data) => {
@@ -96,8 +95,8 @@ dataJSON = (file,university) => {
     return convertData;
 }
 
-module.exports.convertToJSON = (file) => {
-    return dataJSON(file);
+module.exports.convertToJSON = (file,university) => {
+    return dataJSON(file,university);
 }
 
 // var json = JSON.parse((dataJSON('./ExcelFile/SIT-IT-Transcript.xlsx',"KMUTT")).studentJSONData);
