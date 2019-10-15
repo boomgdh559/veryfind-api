@@ -165,11 +165,11 @@ app.post("/api/verifyQRCode",(req,res)=>{
     console.log("Address : ",req.body.verifyAddress.toString())
     const jsonData = await verifyTranscript(req.body.verifyAddress.toString());
     console.log("Json Data : "+jsonData)
-    // if(jsonData !== '' || jsonData.length != 0){
-    //   res.json({fetchResult:jsonData});
-    // }else{
-    //   res.json({fetchResult:false})
-    // }
+    if(jsonData !== '' || jsonData.length != 0){
+      res.json({fetchResult:jsonData});
+    }else{
+      res.json({fetchResult:false})
+    }
     
   })()
 
