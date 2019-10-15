@@ -8,8 +8,8 @@ setUploadTranscript = (userid, transid, manageStatus, manageDate) => {
 
 }
 
-setNewTranscript = (userid, transcriptFile, dateOfUpload) => {
-
+setNewTranscript = (transcriptFile, dateOfUpload) => {
+    //console.log("Array : ", transcriptFile);
     var getLastestSql = "SELECT transid FROM transcript ORDER BY transid DESC LIMIT 1";
     dbconnect.query(getLastestSql, (err1, result1) => {
         //console.log("Result : ", result1.length);

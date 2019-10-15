@@ -14,7 +14,7 @@ const dbconnect = mariadb.createConnection({
 // })
 
 // getResult = (result) => {
-    
+//     console.log("Result : ",result);
 // }
 
 module.exports = {dbconnect}
