@@ -93,7 +93,7 @@ setUniversityRegistrarUser = (firstname, surname, gender, dob, tel, email, passw
 //     "letitgo123", new Date(), "101000", "Human Resource's Staff");
 
 
-setUniversityRegistrarUser("Sineenad", "Junmookda", "Female", new Date(1998, 5, 1), "012-0345678", "sineenad@veryfind.com",
-    "tanja", new Date(), "100000", "34567891231", "University Registrar's Staff", "0xB4F3e535D81e3dD7CEccDA0A626521D149E2b98d");
+// setUniversityRegistrarUser("Sineenad", "Junmookda", "Female", new Date(1998, 5, 1), "012-0345678", "sineenad@veryfind.com",
+//     "tanja", new Date(), "100000", "34567891231", "University Registrar's Staff", "0xB4F3e535D81e3dD7CEccDA0A626521D149E2b98d");
 
 module.exports = {setHumanResourceUser,setUniversityRegistrarUser}
