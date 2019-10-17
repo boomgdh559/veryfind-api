@@ -254,6 +254,16 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
             return res;
         }
     })
+    var connect = await dbconnect();
+    var qrCodeSql = "select qrcode from transcript where transid = ?"
+    const qrCodeData = await connect.query(qrCodeSql, getShortUniName + transcriptid).then((result) => {
+        var qrAddress = result.map((data)=>data.qrcode);
+        if(result.length >= 1){
+            return qrAddress[0];
+        }else{
+            return false;
+        }
+    })
 
     if (findData.length === 0) {
         return { downloadStatus: false, status: 'No ID that you insert' }
@@ -262,7 +272,7 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
         var transcriptJSONData = JSON.parse(findData);
         var pointer = getShortUniName + "_Transcript_" + transcriptid;
         var transcriptData = transcriptJSONData[pointer];
-        return { downloadStatus: true, downloadData: transcriptData }
+        return { downloadStatus: true, downloadData: transcriptData,qrCodeAddress:qrCodeData }
     }
 
 }
@@ -296,4 +306,4 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
 // setUploadTranscript("vf_5")
 //setNewTranscript("vf_5", "59130500068")
 
-module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, checkExist,getDownloadTranscriptData };
+module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, checkExist, getDownloadTranscriptData };

@@ -232,10 +232,11 @@ router.get("/downloadtranscript",(req,res)=>{
     (async()=>{
         var transcriptData = await Manage.getDownloadTranscriptData("vf05",studentId);
         transcriptDownloadStatus = transcriptData.downloadStatus;
+        qrAddress = transcriptData.qrCodeAddress;
         if(transcriptDownloadStatus){
-            res.json({downloadStatus:transcriptData.downloadData});
+            res.json({downloadData:transcriptData.downloadData,qrCodeAddress:qrAddress});
         }else{
-            res.json({downloadStatus:transcriptData.status});
+            res.json({downloadData:false});
         }
     })()
 
