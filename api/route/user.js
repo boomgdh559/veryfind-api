@@ -21,9 +21,9 @@ router.post("/hr/signup",(req,res) =>{
         (async()=>{
             var setHRStatus = await setHumanResourceUser(firstname,surname,gender,dob,tel,email,password,dateRegister,companyName,position);
             if(setHRStatus){
-                res.status(200).json({regisHRStatus:true});
+                res.status(200).json({regisHRStatus:true,error:{}});
             }else{
-                res.status(200).json({regisHRStatus:false});
+                res.status(200).json({regisHRStatus:false,error:{status:405,message:"Method Not Allowed"}});
             }
         })()
     }
@@ -50,9 +50,9 @@ router.post("/registrar/signup",(req,res) =>{
         (async()=>{
             var setRegistrarStatus = await setUniversityRegistrarUser(firstname,surname,gender,dob,tel,email,password,dateRegister,universityName,staffid,position,privatekey);
             if(setRegistrarStatus){
-                res.json({regisStatus:true});
+                res.json({regisStatus:true,error:{}});
             }else{
-                res.json({regisStatus:false});
+                res.json({regisStatus:false,error:{status:405,message:"Method Not Allowed"}});
             }
         })()
         
@@ -67,9 +67,9 @@ router.post('/login',(req,res)=>{
         var authen = await authenticationExist(email,password);
         var authenStatus = authen.loginStatus;
         if(authenStatus){
-            res.json({userData:authen.loginData});
+            res.json({userData:authen.loginData,error:{}});
         }else{
-            res.json({userData:false});
+            res.json({userData:false,error:{status:401,message:"Unauthorized"}});
         }
     })()
     

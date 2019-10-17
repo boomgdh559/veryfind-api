@@ -195,7 +195,7 @@ searchTranscript = async (studentId) => {
             return { searchStatus: true, searchData: allData }
 
         } else {
-            return { searchStatus: false }
+            return { searchStatus: false,searchData: {} }
         }
     })
 

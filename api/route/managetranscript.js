@@ -106,17 +106,17 @@ router.post("/upload", upload.array('excelFile'), (req, res) => {
                                     var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, "vf05");
                                     var updateQRCode = await Manage.setQRCode(allStudentId);
                                     if (uploadDatabase && updateQRCode) {
-                                        res.json({ percent: 100, status: "success" })
+                                        res.json({ percent: 100, status: "success",error:{} })
                                         console.log("100 percent success")
                                         allFile.map((file) => {
                                             deleteExcelFile(file);
                                         })
                                     } else {
-                                        res.json({ percent: 100, status: "error" })
+                                        res.json({ percent: 100, status: "error",error:{status:405,message:"Method Not Allowed"} })
                                     }
                                 })()
                             } else {
-                                res.json({ percent: 100, status: "error" })
+                                res.json({ percent: 100, status: "error",error:{status:500,message:"Internal Server Error"} })
                             }
 
                         }
@@ -151,7 +151,7 @@ router.post("/upload", upload.array('excelFile'), (req, res) => {
             if (checkDuplicateStatus) {
                 addTranscript(jsonData)
             } else {
-                res.json({ percent: 100, status: "error", duplicate: true });
+                res.json({ percent: 100, duplicate: true,error:{status:405,message:"Method Not Allowed"} });
                 allFile.map((file)=>{
                     deleteExcelFile(file);
                 })
@@ -185,14 +185,14 @@ router.post("/update", (req, res) => {
                             var updateDatabase = await Manage.setUpdateTranscript(id, "vf05");
                             if (!err) {
                                 if (updateDatabase) {
-                                    res.json({ updateStatus: true });
+                                    res.json({ updateStatus: true,error:{} });
                                     console.log("success")
                                 } else {
-                                    res.json({ updateStatus: false });
+                                    res.json({ updateStatus: false,error:{status:405,message:"Method Not Allowed"} });
                                 }
 
                             } else {
-                                res.json({ updateStatus: false });
+                                res.json({ updateStatus: false,error:{status:502,message:"Bad Gateway"} });
                             }
                         })()
                     })
@@ -216,10 +216,14 @@ router.get("/searchtranscript", (req, res) => {
     (async () => {
         var searchtranscript = await Manage.searchTranscript(studentId);
         var searchStatus = searchtranscript.searchStatus;
+        var searchData = searchtranscript.searchData;
         if (searchStatus) {
-            res.json(searchtranscript);
+            res.json({searchData:searchData,error:{}});
         } else {
-            res.json(searchtranscript);
+            res.json({searchData:searchData,error:{
+                status:404,
+                message:"Not Found"
+            }});
         }
     })()
 
@@ -234,9 +238,9 @@ router.get("/downloadtranscript",(req,res)=>{
         transcriptDownloadStatus = transcriptData.downloadStatus;
         qrAddress = transcriptData.qrCodeAddress;
         if(transcriptDownloadStatus){
-            res.json({downloadData:transcriptData.downloadData,qrCodeAddress:qrAddress});
+            res.json({downloadData:transcriptData.downloadData,qrCodeAddress:qrAddress,error:{}});
         }else{
-            res.json({downloadData:false});
+            res.json({downloadData:false,error:{status:404,message:"Not Found"}});
         }
     })()
 
@@ -259,9 +263,9 @@ router.get("/fetchTranscript",(req,res)=>{
     (async() => {
       const jsonData = await fetchTranscript(studentId);
       if(jsonData !== '' || jsonData.length != 0){
-        res.json({fetchResult:jsonData});
+        res.json({fetchResult:jsonData,error:{}});
       }else{
-        res.json({fetchResult:"failed"})
+        res.json({fetchResult:"failed",error:{status:404,message:"Not Found"}})
       }
       
     })()

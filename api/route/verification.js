@@ -30,13 +30,13 @@ router.post("/verifyQRCode", (req, res) => {
             const verifyData = { studentId: jsonData.id, verifyDate: new Date() };
             var newVerifyStatus = await Verify.setNewVerification("vf04",verifyData);
             if(newVerifyStatus){
-                res.json({ fetchResult: jsonData });
+                res.json({ fetchResult: jsonData,error:{} });
             }else{
-                res.json({ verifyResult :false });
+                res.json({ fetchResult :false ,error:{status:405,message:"Method Not Allowed"}});
             }
             
         } else {
-            res.json({ fetchResult: false })
+            res.json({ fetchResult: false,error:{status:404,message:"Not Found"} })
         }
 
     })()
