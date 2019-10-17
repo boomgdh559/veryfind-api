@@ -101,8 +101,8 @@ setUploadTranscript = async (transcriptData, userid) => {
         } else {
             return false;
         }
-    }else{
-        return {updateDuplicate : false};
+    } else {
+        return { updateDuplicate: false };
     }
 
 
@@ -246,10 +246,31 @@ setQRCode = async (transcriptData) => {
 
 }
 
+getDownloadTranscriptData = async (userid, transcriptid) => {
+
+    var getShortUniName = await getUniversityShortName(userid);
+    const findData = await transcript.methods.showJSONTranscript(transcriptid).call((err, res) => {
+        if (!err) {
+            return res;
+        }
+    })
+
+    if (findData.length === 0) {
+        return { downloadStatus: false, status: 'No ID that you insert' }
+
+    } else {
+        var transcriptJSONData = JSON.parse(findData);
+        var pointer = getShortUniName + "_Transcript_" + transcriptid;
+        var transcriptData = transcriptJSONData[pointer];
+        return { downloadStatus: true, downloadData: transcriptData }
+    }
+
+}
+
 (async () => {
     //console.log(await getUniversityShortName("vf05"));
-    var data = [[59130500045, new Date()], [59130500068, new Date()]]
-    var data1 = [[59130500066, new Date()], [59130500024, new Date()]]
+    //var data = [[59130500045, new Date()], [59130500068, new Date()]]
+    //var data1 = [[59130500066, new Date()], [59130500024, new Date()]]
     // var data2 = [[59130500065, new Date()], [59130500023, new Date()]]
     //var status = await setUploadTranscript(data, "vf05");
     //console.log("Status : ", await status);
@@ -267,6 +288,7 @@ setQRCode = async (transcriptData) => {
     // })
     // var qrData = await setQRCode([[59130500045],[59130500068]]);
     // console.log("Result : ",await qrData);
+    //console.log(await getDownloadTranscriptData("vf05", "59130500068"));
     //console.log("Search Result : ", await searchTranscript("59130500068"));
     //console.log(await getLastestId("manageid","managetranscript"));
     //console.log(await getLastestId("manageid","managetranscript"));
@@ -274,4 +296,4 @@ setQRCode = async (transcriptData) => {
 // setUploadTranscript("vf_5")
 //setNewTranscript("vf_5", "59130500068")
 
-module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode,checkExist };
+module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, checkExist,getDownloadTranscriptData };

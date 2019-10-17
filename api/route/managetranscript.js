@@ -226,5 +226,46 @@ router.get("/searchtranscript", (req, res) => {
 
 })
 
+router.get("/downloadtranscript",(req,res)=>{
+
+    var studentId = req.body.studentId;
+    (async()=>{
+        var transcriptData = await Manage.getDownloadTranscriptData("vf05",studentId);
+        transcriptDownloadStatus = transcriptData.downloadStatus;
+        if(transcriptDownloadStatus){
+            res.json({downloadStatus:transcriptData.downloadData});
+        }else{
+            res.json({downloadStatus:transcriptData.status});
+        }
+    })()
+
+})
+
+router.get("/fetchTranscript",(req,res)=>{
+    var studentId = req.body.studentId;
+    fetchTranscript = async(id) => {
+      const data = await transcript.methods.showJSONTranscript(id).call((err, res) => {
+        if (!err) {
+          //console.log(typeof res);
+          return res;
+        } else {
+          console.log(err);
+        }
+      });
+      return data;
+    }
+  
+    (async() => {
+      const jsonData = await fetchTranscript(studentId);
+      if(jsonData !== '' || jsonData.length != 0){
+        res.json({fetchResult:jsonData});
+      }else{
+        res.json({fetchResult:"failed"})
+      }
+      
+    })()
+  
+  })
+
 
 module.exports = router;

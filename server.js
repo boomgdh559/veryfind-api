@@ -8,6 +8,7 @@ const fs = require("fs");
 var bodyParser = require('body-parser');
 const userRoutes = require('./api/route/user.js');
 const manageRoute = require("./api/route/managetranscript");
+const verificationRoute = require("./api/route/verification");
 
 app.options('*', cors()) // include before other routes
 app.use(bodyParser.json()); // for parsing application/json
@@ -21,6 +22,7 @@ app.use(function (req, res, next) {
 
 app.use("/api/user",userRoutes);
 app.use("/api/manage",manageRoute);
+app.use("/api/verify",verificationRoute);
 
 app.post("/api/searchTranscript", (req, res) => {
   var id = req.body.searchId;
@@ -107,25 +109,6 @@ app.post("/api/fetchTranscript",(req,res)=>{
 
 })
 
-app.post("/api/verifyQRCode",(req,res)=>{
-  verifyTranscript = async(address) => {
-    const data = await transcript.methods.verifyQRCode(address).call();
-    return data;
-  }
-
-  (async() => {
-    console.log("Address : ",req.body.verifyAddress.toString())
-    const jsonData = await verifyTranscript(req.body.verifyAddress.toString());
-    console.log("Json Data : "+jsonData)
-    if(jsonData.name !== '' || jsonData.id !== "0"){
-      res.json({fetchResult:jsonData});
-    }else{
-      res.json({fetchResult:false})
-    }
-    
-  })()
-
-})
 
 
 
