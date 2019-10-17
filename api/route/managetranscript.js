@@ -136,12 +136,25 @@ router.post("/upload", upload.array('excelFile'), (req, res) => {
 
             })
         }
+        deleteExcelFile = (file) => {
+            fs.unlink(file.path, (err) => {
+                if (!err) {
+                    console.log('Delete ' + file.originalname + ' Successful');
+                } else {
+                    console.log('Cannot Delete');
+                }
+            })
+        }
+        
         (async () => {
             var checkDuplicateStatus = await Manage.checkExist(checkDuplicateRowId);
             if (checkDuplicateStatus) {
                 addTranscript(jsonData)
             } else {
                 res.json({ percent: 100, status: "error", duplicate: true });
+                allFile.map((file)=>{
+                    deleteExcelFile(file);
+                })
             }
         })()
 
