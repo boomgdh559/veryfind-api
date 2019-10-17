@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require('../model/user');
+const {setUniversityRegistrarUser,setHumanResourceUser,authenticationExist} = require('../model/user');
 
 
 router.post("/hr/signup",(req,res) =>{
@@ -12,14 +12,20 @@ router.post("/hr/signup",(req,res) =>{
     var email = req.body.email;
     var password = req.body.password;
     var dateRegister = req.body.dateRegister;
-    var companyid = req.body.companyid;
+    var companyName = req.body.companyname;
     var position = req.body.position;
 
     if(firstname !== 'undefined' || surname !== 'undefined' 
     || gender !== 'undefined' || dob !== 'undefined' || tel !== 'undefined' 
     || email !== 'undefined' || password !== 'undefined' || dateRegister !== 'undefined'){
-        User.setHumanResourceUser(firstname, surname, gender, dob, tel, email, password, dateRegister, companyid, position);
-        return res.json({newHrStatus : true});
+        (async()=>{
+            var setHRStatus = await setHumanResourceUser(firstname,surname,gender,dob,tel,email,password,dateRegister,companyName,position);
+            if(setHRStatus){
+                res.status(200).json({regisHRStatus:true});
+            }else{
+                res.status(200).json({regisHRStatus:false});
+            }
+        })()
     }
 
 })
@@ -33,7 +39,7 @@ router.post("/registrar/signup",(req,res) =>{
     var email = req.body.email;
     var password = req.body.password;
     var dateRegister = req.body.dateRegister;
-    var universityid = req.body.universityid;
+    var universityName = req.body.universityname;
     var staffid = req.body.staffid;
     var position = req.body.position;
     var privatekey = req.body.privatekey;
@@ -41,9 +47,31 @@ router.post("/registrar/signup",(req,res) =>{
     if(firstname !== 'undefined' || surname !== 'undefined' 
     || gender !== 'undefined' || dob !== 'undefined' || tel !== 'undefined' 
     || email !== 'undefined' || password !== 'undefined' || dateRegister !== 'undefined'){
-        User.setUniversityRegistrarUser(firstname, surname, gender, dob, tel, email, password, dateRegister, universityid, staffid, position, privatekey);
-        return res.json({newRegistrarStatus : true});
+        (async()=>{
+            var setRegistrarStatus = await setUniversityRegistrarUser(firstname,surname,gender,dob,tel,email,password,dateRegister,universityName,staffid,position,privatekey);
+            if(setRegistrarStatus){
+                res.json({regisStatus:true});
+            }else{
+                res.json({regisStatus:false});
+            }
+        })()
+        
     }
+    
+})
+
+router.post('/login',(req,res)=>{
+    var email = req.body.email;
+    var password = req.body.password;
+    (async()=>{
+        var authen = await authenticationExist(email,password);
+        var authenStatus = authen.loginStatus;
+        if(authenStatus){
+            res.json({userData:authen.loginData});
+        }else{
+            res.json({userData:false});
+        }
+    })()
     
 })
 

@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const fs = require("fs");
 const Manage = require('../model/managetranscript');
 const dataJSON = require('../../ExcelConnection');
-const {dbconnect} = require('../../DatabaseConnection');
 const { web3, transcript } = require("../../Connection");
 const multer = require('multer');
 const storage = multer.diskStorage({
@@ -20,23 +20,30 @@ const upload = multer({ storage });
 router.post("/upload", upload.array('excelFile'), (req, res) => {
 
     const allFile = req.files;
+
     console.log("All File : ", allFile);
     if (req.files !== 'undefined') {
 
         var jsonData = []
-        var jsonId = [];
+        var allStudentUpload = [];
+        var allStudentId = [];
+        var checkDuplicateRowId = [];
         allFile.map((file, index) => {
             //console.log(file)
             pathFile = file.path;
             console.log("Path File : ", pathFile);
             jsonFile = dataJSON.convertToJSON(pathFile, "KMUTT");
             jsonData.push(jsonFile)
+            allStudentUpload.push([jsonFile.studentId, new Date()]);
+            allStudentId.push([jsonFile.studentId]);
+            checkDuplicateRowId.push(jsonFile.studentId);
             // if(index > 0){
             //   jsonData = jsonData[index-1].concat(jsonData[index]);
             // }
 
         })
-        console.log(jsonData)
+        console.log("All Student Id : ", allStudentId)
+
         // console.log(jsonData.map((data,index)=>data.studentId))
 
         deleteExcelFile = (file) => {
@@ -95,12 +102,19 @@ router.post("/upload", upload.array('excelFile'), (req, res) => {
                         console.log("Count : " + count)
                         if (count === jsonLength) {
                             if (allStatus) {
-                                res.json({ percent: 100, status: "success" })
-                                console.log("100 percent success")
-                                //console.log("All File : ",allFile)
-                                allFile.map((file) => {
-                                    deleteExcelFile(file);
-                                })
+                                (async () => {
+                                    var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, "vf05");
+                                    var updateQRCode = await Manage.setQRCode(allStudentId);
+                                    if (uploadDatabase && updateQRCode) {
+                                        res.json({ percent: 100, status: "success" })
+                                        console.log("100 percent success")
+                                        allFile.map((file) => {
+                                            deleteExcelFile(file);
+                                        })
+                                    } else {
+                                        res.json({ percent: 100, status: "error" })
+                                    }
+                                })()
                             } else {
                                 res.json({ percent: 100, status: "error" })
                             }
@@ -122,7 +136,16 @@ router.post("/upload", upload.array('excelFile'), (req, res) => {
 
             })
         }
-        //addTranscript(jsonData)
+        (async () => {
+            var checkDuplicateStatus = await Manage.checkExist(checkDuplicateRowId);
+            if (checkDuplicateStatus) {
+                addTranscript(jsonData)
+            } else {
+                res.json({ percent: 100, status: "error", duplicate: true });
+            }
+        })()
+
+
 
     }
 
@@ -137,28 +160,56 @@ router.post("/update", (req, res) => {
     var jsonData = req.body.jsonData;
     //console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad);
     //console.log("Id: "+id+" JSON : "+jsonData)
-    updateTranscript = async (id, jsonData) => {
-        account = await web3.eth.getAccounts();
-        try {
-            await transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
-                if (!err) {
-                    res.json({ updateStatus: true });
-                    console.log("success")
-                } else {
-                    res.json({ updateStatus: false });
+    (async () => {
+        var searchtranscript = await Manage.searchTranscript(id);
+        var searchStatus = searchtranscript.searchStatus;
+        updateTranscript = async (id, jsonData) => {
+            if (searchStatus) {
+                account = await web3.eth.getAccounts();
+                try {
+                    await transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
+                        (async () => {
+                            var updateDatabase = await Manage.setUpdateTranscript(id, "vf05");
+                            if (!err) {
+                                if (updateDatabase) {
+                                    res.json({ updateStatus: true });
+                                    console.log("success")
+                                } else {
+                                    res.json({ updateStatus: false });
+                                }
+
+                            } else {
+                                res.json({ updateStatus: false });
+                            }
+                        })()
+                    })
+                } catch (err) {
+                    console.log(err);
                 }
-            })
-        } catch (err) {
-            console.log(err);
+            } else {
+                res.json({ updateStatus: false });
+            }
         }
-    }
-    updateTranscript(id, jsonData);
+
+        await updateTranscript(id, jsonData);
+    })()
+
 })
 
-router.get("/searchtranscript",(req,res)=>{
+router.get("/searchtranscript", (req, res) => {
 
     //List Id from Database
     var studentId = req.body.studentId;
+    (async () => {
+        var searchtranscript = await Manage.searchTranscript(studentId);
+        var searchStatus = searchtranscript.searchStatus;
+        if (searchStatus) {
+            res.json(searchtranscript);
+        } else {
+            res.json(searchtranscript);
+        }
+    })()
+
 
 })
 
