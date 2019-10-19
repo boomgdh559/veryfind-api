@@ -151,7 +151,7 @@ router.post("", upload.array('excelFile'), (req, res) => {
             if (checkDuplicateStatus) {
                 addTranscript(jsonData)
             } else {
-                res.json({ percent: 100, duplicate: true,error:{status:405,message:"Method Not Allowed"} });
+                res.json({uploadStatus: {},error:{status:405,message:"Method Not Allowed"} });
                 allFile.map((file)=>{
                     deleteExcelFile(file);
                 })
