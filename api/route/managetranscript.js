@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-router.post("", upload.array('excelFile'), (req, res) => {
+router.post("/transcripts", upload.array('excelFile'), (req, res) => {
 
     const allFile = req.files;
 
@@ -166,7 +166,7 @@ router.post("", upload.array('excelFile'), (req, res) => {
 
 })
 
-router.put("/:studentId", (req, res) => {
+router.put("/transcripts/:studentId", (req, res) => {
 
     var id = parseInt(req.params.studentId);
     var name = req.body.name;
@@ -213,7 +213,7 @@ router.put("/:studentId", (req, res) => {
 
 })
 
-router.get("", (req, res) => {
+router.get("/transcripts", (req, res) => {
 
     //List Id from Database
     var studentId = req.query.searchId;
@@ -235,7 +235,7 @@ router.get("", (req, res) => {
 
 })
 
-router.get("/:studentId",(req,res)=>{
+router.get("/transcripts/:studentId",(req,res)=>{
 
     var studentId = req.params.studentId;
     (async()=>{
@@ -251,7 +251,7 @@ router.get("/:studentId",(req,res)=>{
 
 })
 
-router.get("/fetchTranscript",(req,res)=>{
+router.get("/transcripts/fetchTranscript",(req,res)=>{
     var studentId = req.body.studentId;
     fetchTranscript = async(id) => {
       const data = await transcript.methods.showJSONTranscript(id).call((err, res) => {
