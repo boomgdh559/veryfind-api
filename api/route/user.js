@@ -3,7 +3,7 @@ const router = express.Router();
 const {setUniversityRegistrarUser,setHumanResourceUser,authenticationExist} = require('../model/user');
 
 
-router.post("/hr/signup",(req,res) =>{
+router.post("/mobile/signup",(req,res) =>{
     var firstname = req.body.firstname;
     var surname = req.body.surname;
     var gender = req.body.gender;
@@ -30,7 +30,7 @@ router.post("/hr/signup",(req,res) =>{
 
 })
 
-router.post("/registrar/signup",(req,res) =>{
+router.post("/web/signup",(req,res) =>{
     var firstname = req.body.firstname;
     var surname = req.body.surname;
     var gender = req.body.gender;

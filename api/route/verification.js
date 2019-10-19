@@ -3,7 +3,7 @@ const router = express.Router();
 const { web3, transcript } = require("../../Connection");
 const Verify = require("../model/verification");
 
-router.post("/verifyQRCode", (req, res) => {
+router.get("/verify/:verifyAddress", (req, res) => {
     verifyTranscript = async (address) => {
         const data = await transcript.methods.verifyQRCode(address).call((err, res) => {
             var status = false
@@ -23,7 +23,7 @@ router.post("/verifyQRCode", (req, res) => {
 
     (async () => {
         //console.log("Address : ",req.body.verifyAddress.toString())
-        const jsonData = await verifyTranscript(req.body.verifyAddress.toString());
+        const jsonData = await verifyTranscript(req.params.verifyAddress.toString());
 
         //console.log("Json Data : "+jsonData)
         if (jsonData.name !== '' || jsonData.id !== "0") {

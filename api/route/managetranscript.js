@@ -17,12 +17,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-router.post("/upload", upload.array('excelFile'), (req, res) => {
+router.post("", upload.array('excelFile'), (req, res) => {
 
     const allFile = req.files;
 
     console.log("All File : ", allFile);
-    if (req.files !== 'undefined') {
+    if (req.files !== undefined) {
 
         var jsonData = []
         var allStudentUpload = [];
@@ -160,18 +160,22 @@ router.post("/upload", upload.array('excelFile'), (req, res) => {
 
 
 
+    }else{
+        res.json({uploadFile:{},error:{status:404,message:"Not Found"}})
     }
 
 })
 
-router.post("/update", (req, res) => {
-    var id = parseInt(req.body.id);
+router.put("/:studentId", (req, res) => {
+
+    var id = parseInt(req.params.studentId);
     var name = req.body.name;
     var degree = req.body.degree;
     var gpa = req.body.gpa;
     var dateGrad = req.body.dateGrad;
     var jsonData = req.body.jsonData;
-    //console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad);
+    // console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad);
+    // console.log("Params : ",req.params.studentId);
     //console.log("Id: "+id+" JSON : "+jsonData)
     (async () => {
         var searchtranscript = await Manage.searchTranscript(id);
@@ -188,19 +192,19 @@ router.post("/update", (req, res) => {
                                     res.json({ updateStatus: true,error:{} });
                                     console.log("success")
                                 } else {
-                                    res.json({ updateStatus: false,error:{status:405,message:"Method Not Allowed"} });
+                                    res.json({ updateStatus: {},error:{status:405,message:"Method Not Allowed"} });
                                 }
 
                             } else {
-                                res.json({ updateStatus: false,error:{status:502,message:"Bad Gateway"} });
+                                res.json({ updateStatus: {},error:{status:502,message:"Bad Gateway"} });
                             }
                         })()
                     })
                 } catch (err) {
-                    console.log(err);
+                    console.error(err);
                 }
             } else {
-                res.json({ updateStatus: false });
+                res.json({ updateStatus: {},error:{status:404,message:"Not Found"} });
             }
         }
 
@@ -209,10 +213,11 @@ router.post("/update", (req, res) => {
 
 })
 
-router.get("/searchtranscript", (req, res) => {
+router.get("", (req, res) => {
 
     //List Id from Database
-    var studentId = req.body.studentId;
+    var studentId = req.query.searchId;
+    
     (async () => {
         var searchtranscript = await Manage.searchTranscript(studentId);
         var searchStatus = searchtranscript.searchStatus;
@@ -230,9 +235,9 @@ router.get("/searchtranscript", (req, res) => {
 
 })
 
-router.get("/downloadtranscript",(req,res)=>{
+router.get("/:studentId",(req,res)=>{
 
-    var studentId = req.body.studentId;
+    var studentId = req.params.studentId;
     (async()=>{
         var transcriptData = await Manage.getDownloadTranscriptData("vf05",studentId);
         transcriptDownloadStatus = transcriptData.downloadStatus;
