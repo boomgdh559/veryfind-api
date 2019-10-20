@@ -14,6 +14,7 @@ getLastestId = async (attribute, table) => {
             return index + (++numberInt);
         }
         var newUserId = increaseId(numberOrder);
+        connect.end().then(()=>console.log("Close Connection in Lastest Id"));
         return newUserId;
     })
 
@@ -25,6 +26,7 @@ findCompanyIdByCompanyRegister = async (companyRegister) => {
     var sql = "SELECT companyid FROM company WHERE companyregisnumber like ?";
     var companyId = await connect.query(sql, companyRegister).then((result) => {
         data = result.map((data) => data.companyid);
+        connect.end().then(()=>console.log("Close Connection in Find Company"));
         //console.log("Data : ",result);
         return data[0];
     })
@@ -36,6 +38,7 @@ findUniversityIdByUniversityName = async (universityName) => {
     var sql = "SELECT universityid FROM university WHERE universityname like ?";
     var universityId = await connect.query(sql, universityName + "%").then((result) => {
         data = result.map((data) => data.universityid);
+        connect.end().then(()=>console.log("Close Connection in University Id"));
         //console.log("Data : ",result);
         return data[0];
     })
@@ -58,6 +61,7 @@ setHumanResourceUser = async (firstname, surname, gender, dob, tel, email, passw
     setUserStatus = await connect.query(newUserSql, newUser).then((result) => {
         if (result.affectedRows >= 1) {
             console.log(result.affectedRows + " User is created")
+            connect.end().then(()=>console.log("Close Connection in User signup"));
             return true;
         } else {
             return false;
@@ -70,6 +74,7 @@ setHumanResourceUser = async (firstname, surname, gender, dob, tel, email, passw
         setHRStatus = await connect.query(newHRSql, newHRUser).then((result) => {
             if (result.affectedRows >= 1) {
                 console.log(result.affectedRows + " HR's user is created")
+                connect.end().then(()=>console.log("Close Connection in HR signup"));
                 return true;
             } else {
                 return false;
@@ -94,6 +99,7 @@ setUniversityRegistrarUser = async (firstname, surname, gender, dob, tel, email,
     setUserStatus = await connect.query(newUserSql, newUser).then((result) => {
         if (result.affectedRows >= 1) {
             console.log(result.affectedRows + " User is created")
+            connect.end().then(()=>console.log("Close Connection in User signup"));
             return true;
         } else {
             return false;
@@ -106,6 +112,7 @@ setUniversityRegistrarUser = async (firstname, surname, gender, dob, tel, email,
         var newRegistrarUser = [newUserId, universityid, staffid, position, privatekey];
         setRegistrarStatus = await connect.query(newRegistrarSql, newRegistrarUser).then((result) => {
             if (result.affectedRows >= 1) {
+                connect.end().then(()=>console.log("Close Connection in Registrar signup"));
                 return true;
             } else {
                 return false;
@@ -126,6 +133,7 @@ authenticationExist = async (email, password) => {
         if(result.length !== 0){
             console.log("Result : ", result);
             var data = result[0];
+            connect.end().then(()=>console.log("Close Connection in Login"));
             return {loginStatus:true,loginData:{
                 userid:data.userid,
                 firstname:data.firstname,

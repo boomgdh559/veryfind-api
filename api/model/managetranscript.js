@@ -7,6 +7,7 @@ getUniversityShortName = async (userid) => {
     return await connect.query(getUniversitySql, userid).then((result) => {
         var universityId = result.map((data) => data.universityshortname);
         //console.log("Result : ",result);
+        connect.end().then(()=>console.log("Close Connection in University"));
         return universityId[0];
     })
 }
@@ -15,12 +16,17 @@ checkExist = async (transcriptId) => {
     var connect = await dbconnect();
     var checkExistSql = "select count(transid) as countrow from transcript where transid like ?";
     var countDuplicateRow = 0;
-    var checkExistStatus = transcriptId.map(async (idData) => {
+    var checkExistStatus = transcriptId.map(async (idData,index) => {
         var allStatus = await connect.query(checkExistSql, "%" + idData).then((result) => {
             var countRow = result.map((data) => data.countrow);
+            
             //console.log("Count Row : ",countRow);
             if (countRow[0] === 1) {
                 return ++countDuplicateRow;
+            }
+
+            if(++index === transcriptId.length){
+                connect.end().then(()=>console.log("Close Connection in Check"));
             }
         })
 
@@ -50,7 +56,7 @@ setUploadTranscript = async (transcriptData, userid) => {
         date = result[1];
         return [newId, date];
     })
-    var allId = allData.map((data, index) => {
+    var allId = allData.map((data) => {
         newId = data[0]
         return newId
     })
@@ -59,15 +65,23 @@ setUploadTranscript = async (transcriptData, userid) => {
     console.log("Check Result : ", checkExistStatus);
     //console.log("All Data : ",allData)
     if (checkExistStatus) {
-        var newUploadTranscriptStatus = allData.map(async (data) => {
+        var newUploadTranscriptStatus = allData.map(async (data,index) => {
             try {
                 var allUploadStatus = await connect.query(newTranscriptSql, data).then((result) => {
-                    if (result.affectedRows >= 1) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    if(++index !== allData.length){
+                        if (result.affectedRows >= 1) {
+                        
+                            return true;
+                        } else {
+                            
+                            return false;
+                        }
+                    }else{
+                        console.log("In Here Upload");
+                        connect.end().then(()=>console.log("Close Connection in Upload"));
+                    } 
                 })
+                
                 return allUploadStatus;
             } catch (error) {
                 return false;
@@ -115,9 +129,11 @@ getLastestId = async (attribute, table) => {
     return connect.query(getLastestSql).then((result) => {
         data = result.map((data) => data.manageid);
         if (result.length <= 0) {
+            connect.end();
             return "manage01";
         } else {
             //console.log("Id : ", result);
+            connect.end();
             var numberOrder = data[0].substring(7);
             increaseId = (numberOrder) => {
                 var index = "manage0";
@@ -140,21 +156,36 @@ setNewManageTranscript = async (data) => {
     var insertNewManage = "INSERT INTO managetranscript( manageid, userid, transid,managestatus,managedate) VALUES (?,?,?,?,?)";
     // var newManageId = await getLastestId("manageid", "managetranscript");
     //console.log("New Id 1 : ", newManageId);
-    return data.map(async (allManageData) => {
+    var allManageStatus = data.map(async(allManageData,index) => {
         //console.log("Round : "+(++index));
+        // console.log("Data : ",index);    
         try {
-            return await connect.query(insertNewManage, allManageData).then(async (result) => {
-                if (result.affectedRows >= 1) {
-                    return true;
-                } else {
-                    return false;
+            var manageStatus = await connect.query(insertNewManage, allManageData).then(async (result) => {
+                if(++index !== data.length){
+                    if (result.affectedRows >= 1) {
+                        //++countInsert;
+                        return true;
+                    } else {
+                        //++countInsert;
+                        return false;
+                    }
+                }else{
+                    console.log("In here Manage");
+                    connect.end().then(()=>console.log("Close Connection in Manage"));
                 }
+                
+                
             })
+            
+            return manageStatus;
         } catch (error) {
             console.error(error);
         }
-
+        
     })
+
+    return allManageStatus;
+    
 
 }
 
@@ -168,8 +199,10 @@ setUpdateTranscript = async (transcriptid, userid) => {
     return await connect.query(insertNewManage, newUploadData).then((result) => {
         if (result.affectedRows >= 1) {
             console.log(result.affectedRows, " Update is insert");
+            connect.end().then(()=>console.log("Close Connection"));
             return true
         } else {
+            connect.end().then(()=>console.log("Close Connection"));
             return false;
         }
     })
@@ -191,10 +224,12 @@ searchTranscript = async (studentId) => {
                     qrCode: data.qrcode
                 }
             })
+            connect.end().then(()=>console.log("Close Connection"));
             //console.log("All Data : ",allData);
             return { searchStatus: true, searchData: allData }
 
         } else {
+            connect.end().then(()=>console.log("Close Connection"));
             return { searchStatus: false,searchData: {} }
         }
     })
@@ -226,14 +261,21 @@ setQRCode = async (transcriptData) => {
     })
 
     var updateQRSql = "UPDATE transcript SET qrcode = ? WHERE transid like ?";
-    var updateQRStatus = allQRCode.map(async (data) => {
+    var updateQRStatus = allQRCode.map(async (data,index) => {
         var qrData = await data;
         return await connect.query(updateQRSql, qrData).then((result) => {
-            if (result.affectedRows >= 1) {
-                return true;
-            } else {
-                return false;
+            if(++index !== allQRCode.length){
+                if (result.affectedRows >= 1) {
+                    
+                    return true;
+                } else {
+                    
+                    return false;
+                }
+            }else{
+                connect.end().then(()=>console.log("Close Connection in Update"));
             }
+            
         })
     })
 
@@ -259,8 +301,10 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
     const qrCodeData = await connect.query(qrCodeSql, getShortUniName + transcriptid).then((result) => {
         var qrAddress = result.map((data)=>data.qrcode);
         if(result.length >= 1){
+            connect.end().then(()=>console.log("Close Connection in Download"));
             return qrAddress[0];
         }else{
+            connect.end().then(()=>console.log("Close Connection in Download"));
             return false;
         }
     })
@@ -282,7 +326,7 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
     //var data = [[59130500045, new Date()], [59130500068, new Date()]]
     //var data1 = [[59130500066, new Date()], [59130500024, new Date()]]
     // var data2 = [[59130500065, new Date()], [59130500023, new Date()]]
-    //var status = await setUploadTranscript(data, "vf05");
+    //var status = await setUploadTranscript(data1, "vf05");
     //console.log("Status : ", await status);
     // status.map(async (result) => {
     //     console.log("All Result : ", await result);
@@ -298,7 +342,7 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
     // })
     // var qrData = await setQRCode([[59130500045],[59130500068]]);
     // console.log("Result : ",await qrData);
-    //console.log(await getDownloadTranscriptData("vf05", "59130500068"));
+    console.log("Download Result : ",await getDownloadTranscriptData("vf05", "59130500068"));
     //console.log("Search Result : ", await searchTranscript("59130500068"));
     //console.log(await getLastestId("manageid","managetranscript"));
     //console.log(await getLastestId("manageid","managetranscript"));

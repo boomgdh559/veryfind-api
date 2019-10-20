@@ -2,15 +2,16 @@ const mariadb = require('mariadb');
 
 
 const dbconnect = async () => {
-    return await mariadb.createConnection({
+    var dbPool = await mariadb.createPool({
         host: '18.139.229.175',
         port: '3306',
         user: 'veryfind',
         password: 'Veryfind_026',
-        database: 'veryfine'
-    }).then((connect)=>{
-        return connect
+        database: 'veryfine',
+        connectionLimit: 7
     })
+
+    return dbPool;
 }
 
 
@@ -25,10 +26,21 @@ const dbconnect = async () => {
 // } 
 
 // (async() => {
-//     const connect = await dbconnect();
-//     connect.query("select userid from user").then((result)=>{
-//         console.log(result.user)
-//     })
+//     try{
+//         const connect = await dbconnect();
+//         var userId = await connect.query("select userid from user").then((result)=>{
+//             var data = result.map((data)=>data.userid);
+//             connect.end().then(()=>console.log("Close Connection"));
+//             return data;
+//         })
+//         userId.map((data)=>{
+//             console.log("User Id : ",data);
+//         })
+        
+//     }catch(err){
+//         console.error(err);
+//     }
+    
 // })()
 
 

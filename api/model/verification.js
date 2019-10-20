@@ -11,11 +11,15 @@ setNewVerification = async(userid,transcriptData) => {
     var newVerifyData = [newVerifyId,transcriptId,userid,verifyDate,'SUCCESS'];
     var verifyStatus = await connect.query(newVerifySql,newVerifyData).then((result)=>{
         if (result.affectedRows >= 1) {
+            connect.end().then(()=>console.log("Close Connection in Verify"));
             return true;
         } else {
+            connect.end().then(()=>console.log("Close Connection in Verify"));
             return false;
         }
+        
     })
+    
 
     return verifyStatus;
 
@@ -27,6 +31,7 @@ getTransId = async (transcriptId) => {
     return await connect.query(getTransIdSql,"%"+transcriptId).then((result) => {
         var transId = result.map((data) => data.transid);
         //console.log("Result : ",result);
+        connect.end().then(()=>console.log("Close Connection in TransId"));
         return transId[0];
     })
 }
@@ -38,9 +43,11 @@ getLastestVerifyId = async (attribute, table) => {
     return connect.query(getLastestSql).then((result) => {
         data = result.map((data) => data.verifyid);
         if (result.length <= 0) {
+            connect.end().then(()=>console.log("Close Connection in VerifyId"));
             return "verify01";
         } else {
             //console.log("Id : ", result);
+            connect.end().then(()=>console.log("Close Connection in VerifyId"));
             var numberOrder = data[0].substring(7);
             increaseId = (numberOrder) => {
                 var index = "verify0";
@@ -58,8 +65,8 @@ getLastestVerifyId = async (attribute, table) => {
 
 (async()=>{
 
-    // var data = {studentId:59130500045,verifyDate:new Date()};
-    // console.log("Result : ",await setNewVerification("vf04",data));
+     var data = {studentId:59130500045,verifyDate:new Date()};
+    console.log("Result : ",await setNewVerification("vf04",data));
 
 
 })()
