@@ -8,6 +8,6 @@ module.exports = (req,res,next) => {
         next();
 
     }catch(error){
-        return res.json({authenData:{authenStatus:"Please Login.",token:{}},error:{status:401,message:"Unauthorized"}})
+        return res.json({error:{status:401,message:"Unauthorized"}})
     }
 }

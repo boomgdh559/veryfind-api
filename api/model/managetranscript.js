@@ -217,8 +217,9 @@ setUpdateTranscript = async (transcriptid, userid) => {
 searchTranscript = async (userid,studentId) => {
 
     var connect = await dbconnect();
-    var searchStudentId = "%" + studentId + "%";
     var getShortName = await getUniversityShortName(userid);
+    var searchStudentId = getShortName+"%" + studentId;
+    
     var searchTranscriptSql = "SELECT * FROM transcript where transid like ?";
 
     return await connect.query(searchTranscriptSql, searchStudentId).then((result) => {

@@ -217,7 +217,7 @@ router.get("/transcripts", checkAuthen, (req, res) => {
 
     //List Id from Database
     var studentId = req.query.searchId;
-
+    
     (async () => {
         var searchtranscript = await Manage.searchTranscript(req.userData.userid, studentId);
         var searchStatus = searchtranscript.searchStatus;
@@ -226,7 +226,8 @@ router.get("/transcripts", checkAuthen, (req, res) => {
             res.json({ searchData: searchData, error: {} });
         } else {
             res.json({
-                searchData: searchData, error: {
+                searchData: searchData, 
+                error: {
                     status: 404,
                     message: "Not Found"
                 }
