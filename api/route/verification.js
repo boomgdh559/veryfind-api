@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { web3, transcript } = require("../../Connection");
 const Verify = require("../model/verification");
+const checkAuthen = require('../middleware/authentication');
 
-router.get("/verify/:verifyAddress", (req, res) => {
+router.get("/verify/:verifyAddress",checkAuthen,(req, res) => {
     verifyTranscript = async (address) => {
         const data = await transcript.methods.verifyQRCode(address).call((err, res) => {
             var status = false
@@ -24,11 +25,10 @@ router.get("/verify/:verifyAddress", (req, res) => {
     (async () => {
         //console.log("Address : ",req.body.verifyAddress.toString())
         const jsonData = await verifyTranscript(req.params.verifyAddress.toString());
-
         //console.log("Json Data : "+jsonData)
         if (jsonData.name !== '' || jsonData.id !== "0") {
             const verifyData = { studentId: jsonData.id, verifyDate: new Date() };
-            var newVerifyStatus = await Verify.setNewVerification("vf04",verifyData);
+            var newVerifyStatus = await Verify.setNewVerification(req.userData.userid,verifyData);
             if(newVerifyStatus){
                 res.json({ fetchResult: jsonData,error:{} });
             }else{

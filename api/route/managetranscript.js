@@ -15,9 +15,9 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({ storage });
+const checkAuthen = require('../middleware/authentication');
 
-
-router.post("/transcripts", upload.array('excelFile'), (req, res) => {
+router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) => {
 
     const allFile = req.files;
 
@@ -103,20 +103,20 @@ router.post("/transcripts", upload.array('excelFile'), (req, res) => {
                         if (count === jsonLength) {
                             if (allStatus) {
                                 (async () => {
-                                    var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, "vf05");
+                                    var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, req.userData.userid);
                                     var updateQRCode = await Manage.setQRCode(allStudentId);
                                     if (uploadDatabase && updateQRCode) {
-                                        res.json({ percent: 100, status: "success",error:{} })
+                                        res.json({ percent: 100, status: "success", error: {} })
                                         console.log("100 percent success")
                                         allFile.map((file) => {
                                             deleteExcelFile(file);
                                         })
                                     } else {
-                                        res.json({ percent: 100, status: "error",error:{status:405,message:"Method Not Allowed"} })
+                                        res.json({ percent: 100, status: "error", error: { status: 405, message: "Method Not Allowed" } })
                                     }
                                 })()
                             } else {
-                                res.json({ percent: 100, status: "error",error:{status:500,message:"Internal Server Error"} })
+                                res.json({ percent: 100, status: "error", error: { status: 500, message: "Internal Server Error" } })
                             }
 
                         }
@@ -145,14 +145,14 @@ router.post("/transcripts", upload.array('excelFile'), (req, res) => {
                 }
             })
         }
-        
+
         (async () => {
             var checkDuplicateStatus = await Manage.checkExist(checkDuplicateRowId);
             if (checkDuplicateStatus) {
                 addTranscript(jsonData)
             } else {
-                res.json({uploadStatus: {},error:{status:405,message:"Method Not Allowed"} });
-                allFile.map((file)=>{
+                res.json({ uploadStatus: {}, error: { status: 405, message: "Method Not Allowed" } });
+                allFile.map((file) => {
                     deleteExcelFile(file);
                 })
             }
@@ -160,13 +160,13 @@ router.post("/transcripts", upload.array('excelFile'), (req, res) => {
 
 
 
-    }else{
-        res.json({uploadFile:{},error:{status:404,message:"Not Found"}})
+    } else {
+        res.json({ uploadFile: {}, error: { status: 404, message: "Not Found" } })
     }
 
 })
 
-router.put("/transcripts/:studentId", (req, res) => {
+router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
 
     var id = parseInt(req.params.studentId);
     var name = req.body.name;
@@ -178,7 +178,7 @@ router.put("/transcripts/:studentId", (req, res) => {
     // console.log("Params : ",req.params.studentId);
     //console.log("Id: "+id+" JSON : "+jsonData)
     (async () => {
-        var searchtranscript = await Manage.searchTranscript(id);
+        var searchtranscript = await Manage.searchTranscript(req.userData.userid,id);
         var searchStatus = searchtranscript.searchStatus;
         updateTranscript = async (id, jsonData) => {
             if (searchStatus) {
@@ -186,17 +186,17 @@ router.put("/transcripts/:studentId", (req, res) => {
                 try {
                     await transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
                         (async () => {
-                            var updateDatabase = await Manage.setUpdateTranscript(id, "vf05");
+                            var updateDatabase = await Manage.setUpdateTranscript(id, req.userData.userid);
                             if (!err) {
                                 if (updateDatabase) {
-                                    res.json({ updateStatus: true,error:{} });
+                                    res.json({ updateStatus: true, error: {} });
                                     console.log("success")
                                 } else {
-                                    res.json({ updateStatus: {},error:{status:405,message:"Method Not Allowed"} });
+                                    res.json({ updateStatus: {}, error: { status: 405, message: "Method Not Allowed" } });
                                 }
 
                             } else {
-                                res.json({ updateStatus: {},error:{status:502,message:"Bad Gateway"} });
+                                res.json({ updateStatus: {}, error: { status: 502, message: "Bad Gateway" } });
                             }
                         })()
                     })
@@ -204,7 +204,7 @@ router.put("/transcripts/:studentId", (req, res) => {
                     console.error(err);
                 }
             } else {
-                res.json({ updateStatus: {},error:{status:404,message:"Not Found"} });
+                res.json({ updateStatus: {}, error: { status: 404, message: "Not Found" } });
             }
         }
 
@@ -213,69 +213,72 @@ router.put("/transcripts/:studentId", (req, res) => {
 
 })
 
-router.get("/transcripts", (req, res) => {
+router.get("/transcripts", checkAuthen, (req, res) => {
 
     //List Id from Database
     var studentId = req.query.searchId;
-    
+
     (async () => {
-        var searchtranscript = await Manage.searchTranscript(studentId);
+        var searchtranscript = await Manage.searchTranscript(req.userData.userid, studentId);
         var searchStatus = searchtranscript.searchStatus;
         var searchData = searchtranscript.searchData;
         if (searchStatus) {
-            res.json({searchData:searchData,error:{}});
+            res.json({ searchData: searchData, error: {} });
         } else {
-            res.json({searchData:searchData,error:{
-                status:404,
-                message:"Not Found"
-            }});
+            res.json({
+                searchData: searchData, error: {
+                    status: 404,
+                    message: "Not Found"
+                }
+            });
         }
     })()
 
 
 })
 
-router.get("/transcripts/:studentId",(req,res)=>{
+router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 
     var studentId = req.params.studentId;
-    (async()=>{
-        var transcriptData = await Manage.getDownloadTranscriptData("vf05",studentId);
+    (async () => {
+        var transcriptData = await Manage.getDownloadTranscriptData(req.userData.userid, studentId);
         transcriptDownloadStatus = transcriptData.downloadStatus;
         qrAddress = transcriptData.qrCodeAddress;
-        if(transcriptDownloadStatus){
-            res.json({downloadData:transcriptData.downloadData,qrCodeAddress:qrAddress,error:{}});
-        }else{
-            res.json({downloadData:false,error:{status:404,message:"Not Found"}});
+        if (transcriptDownloadStatus) {
+            res.json({ downloadData: transcriptData.downloadData, qrCodeAddress: qrAddress, error: {} });
+        } else {
+            res.json({ downloadData: false, error: { status: 404, message: "Not Found" } });
         }
     })()
 
 })
 
-router.get("/transcripts/fetchTranscript",(req,res)=>{
+router.get("/transcripts/fetchTranscript",checkAuthen, (req, res) => {
     var studentId = req.body.studentId;
-    fetchTranscript = async(id) => {
-      const data = await transcript.methods.showJSONTranscript(id).call((err, res) => {
-        if (!err) {
-          //console.log(typeof res);
-          return res;
-        } else {
-          console.log(err);
-        }
-      });
-      return data;
+    fetchTranscript = async (id) => {
+        const data = await transcript.methods.showJSONTranscript(id).call((err, res) => {
+            if (!err) {
+                //console.log(typeof res);
+                return res;
+            } else {
+                console.log(err);
+            }
+        });
+        return data;
     }
-  
-    (async() => {
-      const jsonData = await fetchTranscript(studentId);
-      if(jsonData !== '' || jsonData.length != 0){
-        res.json({fetchResult:jsonData,error:{}});
-      }else{
-        res.json({fetchResult:"failed",error:{status:404,message:"Not Found"}})
-      }
-      
+
+    (async () => {
+        const getShortName = await Manage.getUniversityShortName(req.userData.userid);
+        const jsonData = await fetchTranscript(getShortName+studentId);
+        if (jsonData !== '' || jsonData.length != 0) {
+            res.json({ fetchResult: jsonData, error: {} });
+        } else {
+            res.json({ fetchResult: "failed", error: { status: 404, message: "Not Found" } })
+        }
+
     })()
-  
-  })
+
+})
 
 
 module.exports = router;

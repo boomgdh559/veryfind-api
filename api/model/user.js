@@ -21,6 +21,26 @@ getLastestId = async (attribute, table) => {
 
 }
 
+checkUserExist = async(firstname,surname,email) =>{
+
+    var connect = await dbconnect();
+    var checkUserSql = "select firstname,surname,email from user where firstname like ? and surname like ? and email = ?"
+    var checkUserData = [firstname,surname,email];
+    return await connect.query(checkUserSql,checkUserData).then((result)=>{
+        const data = result;
+        var returnStatus = {};
+        if(data.length >= 1){
+            returnStatus = {checkUserExist:true};
+        }else{
+            returnStatus = {checkUserExist:false};
+        }
+        connect.end().then(()=>console.log("Close Connection in Check User Exist"));
+        return returnStatus;
+        
+    })
+
+} 
+
 findCompanyIdByCompanyRegister = async (companyRegister) => {
     var connect = await dbconnect();
     var sql = "SELECT companyid FROM company WHERE companyregisnumber like ?";
@@ -131,7 +151,7 @@ authenticationExist = async (email, password) => {
     var loginData = [email, password];
     var loginStatus = await connect.query(sql, loginData).then((result) => {
         if(result.length !== 0){
-            console.log("Result : ", result);
+            //console.log("Result : ", result);
             var data = result[0];
             connect.end().then(()=>console.log("Close Connection in Login"));
             return {loginStatus:true,loginData:{
@@ -143,6 +163,7 @@ authenticationExist = async (email, password) => {
                 tel:data.tel
             }}
         }else{
+            connect.end().then(()=>console.log("Close Connection in Login"));
             return {loginStatus:false};
         }
         
@@ -151,10 +172,44 @@ authenticationExist = async (email, password) => {
 
 }
 
+checkHRUser = async(email,password) => {
+    var connect = await dbconnect();
+    var checkHRSql = "SELECT hr.userid FROM user u join humanresourcestaff hr on u.userid = hr.userid WHERE u.email = ? and u.password = ?";
+    var checkHRData = [email,password];
+    return await connect.query(checkHRSql,checkHRData).then((result)=>{
+        var data = result;
+        var resultStatus = {};
+        if(data.length >= 1){
+            resultStatus = {checkHRStatus:true}
+        }else{
+            resultStatus = {checkHRStatus:false}
+        }
+        connect.end().then(()=>console.log("Close Connection in Check HR User"));
+        return resultStatus;
+    })
+}
 
-
+checkRegistrarUser = async(email,password) => {
+    var connect = await dbconnect();
+    var checkHRSql = "SELECT r.userid FROM user u join universityregistrar r on u.userid = r.userid WHERE u.email = ? and u.password = ?";
+    var checkHRData = [email,password];
+    return await connect.query(checkHRSql,checkHRData).then((result)=>{
+        var data = result;
+        var resultStatus = {};
+        if(data.length >= 1){
+            resultStatus = {checkRegistrarStatus:true}
+        }else{
+            resultStatus = {checkRegistrarStatus:false}
+        }
+        connect.end().then(()=>console.log("Close Connection in Check Registrar User"));
+        return resultStatus;
+    })
+}
 
 (async () => {
+    //console.log(await checkHRUser("saknarong@veryfine.com","letitgo123"));
+    //console.log(await checkRegistrarUser("sineenad@veryfind.com","tanja"));
+    //console.log(await checkUserExist("jurich","Sangprasert","purich@veryfine.com"));
     //console.log("Userid : ", await getLastestId("userid", "user"));
     // console.log("HR Result : ",await setHumanResourceUser("Saknarong", "Pongthonglang", "Male", new Date(1997, 8, 12), "012-0345678", "saknarong@veryfind.com",
     // "letitgo123", new Date(), "0105558193432", "Human Resource's Staff"));
@@ -165,4 +220,4 @@ authenticationExist = async (email, password) => {
     //console.log("Login : ", await authenticationExist("purich@veryfine.com","boomgdh559"));
 
 })()
-module.exports = { setHumanResourceUser, setUniversityRegistrarUser,authenticationExist }
+module.exports = { setHumanResourceUser, setUniversityRegistrarUser,authenticationExist,checkUserExist,checkHRUser,checkRegistrarUser }

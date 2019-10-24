@@ -49,11 +49,20 @@ getLastestVerifyId = async (attribute, table) => {
             //console.log("Id : ", result);
             connect.end().then(()=>console.log("Close Connection in VerifyId"));
             var numberOrder = data[0].substring(7);
+            //console.log("Number Order : ",data);
             increaseId = (numberOrder) => {
-                var index = "verify0";
+                var index1 = "verify0";
+                var index2 = "verify";
+                var returnId = "";
                 var numberInt = parseInt(numberOrder);
+                if(numberInt >= 9){
+                    returnId = index2 + (++numberInt);
+                }else{
+                    returnId = index1 + (++numberInt);
+                }
+                return returnId;
                 //console.log("Number INT : ",numberInt+" "+numberOrder);
-                return index + (++numberInt);
+                
             }
             var newUserId = increaseId(numberOrder);
             return newUserId;
@@ -65,9 +74,9 @@ getLastestVerifyId = async (attribute, table) => {
 
 (async()=>{
 
-     var data = {studentId:59130500045,verifyDate:new Date()};
-    console.log("Result : ",await setNewVerification("vf04",data));
-
+    // var data = {studentId:59130500045,verifyDate:new Date()};
+    //console.log("Result : ",await setNewVerification("vf04",data));
+    //console.log(await getLastestVerifyId("verifyid","verification"));
 
 })()
 

@@ -136,10 +136,16 @@ getLastestId = async (attribute, table) => {
             connect.end();
             var numberOrder = data[0].substring(7);
             increaseId = (numberOrder) => {
-                var index = "manage0";
+                var index1 = "manage0";
+                var index2 = "manage";
+                var returnId = "";
                 var numberInt = parseInt(numberOrder);
-                //console.log("Number INT : ",numberInt+" "+numberOrder);
-                return index + (++numberInt);
+                if(numberInt >= 9){
+                    returnId = index2 + (++numberInt);
+                }else{
+                    returnId = index1 + (++numberInt);
+                }
+                return returnId;
             }
             var newUserId = increaseId(numberOrder);
             return newUserId;
@@ -208,10 +214,11 @@ setUpdateTranscript = async (transcriptid, userid) => {
     })
 }
 
-searchTranscript = async (studentId) => {
+searchTranscript = async (userid,studentId) => {
 
     var connect = await dbconnect();
     var searchStudentId = "%" + studentId + "%";
+    var getShortName = await getUniversityShortName(userid);
     var searchTranscriptSql = "SELECT * FROM transcript where transid like ?";
 
     return await connect.query(searchTranscriptSql, searchStudentId).then((result) => {
@@ -342,7 +349,7 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
     // })
     // var qrData = await setQRCode([[59130500045],[59130500068]]);
     // console.log("Result : ",await qrData);
-    console.log("Download Result : ",await getDownloadTranscriptData("vf05", "59130500068"));
+    //console.log("Download Result : ",await getDownloadTranscriptData("vf05", "59130500068"));
     //console.log("Search Result : ", await searchTranscript("59130500068"));
     //console.log(await getLastestId("manageid","managetranscript"));
     //console.log(await getLastestId("manageid","managetranscript"));
@@ -350,4 +357,4 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
 // setUploadTranscript("vf_5")
 //setNewTranscript("vf_5", "59130500068")
 
-module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, checkExist, getDownloadTranscriptData };
+module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode,getUniversityShortName, checkExist, getDownloadTranscriptData };
