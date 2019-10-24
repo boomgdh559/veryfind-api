@@ -134,7 +134,7 @@ getLastestId = async (attribute, table) => {
         } else {
             //console.log("Id : ", result);
             connect.end();
-            var numberOrder = data[0].substring(7);
+            var numberOrder = data[0].substring(6);
             increaseId = (numberOrder) => {
                 var index1 = "manage0";
                 var index2 = "manage";

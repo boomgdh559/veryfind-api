@@ -48,13 +48,14 @@ getLastestVerifyId = async (attribute, table) => {
         } else {
             //console.log("Id : ", result);
             connect.end().then(()=>console.log("Close Connection in VerifyId"));
-            var numberOrder = data[0].substring(7);
+            var numberOrder = data[0].substring(6);
             //console.log("Number Order : ",data);
             increaseId = (numberOrder) => {
                 var index1 = "verify0";
                 var index2 = "verify";
                 var returnId = "";
                 var numberInt = parseInt(numberOrder);
+                console.log("Number : ",result);
                 if(numberInt >= 9){
                     returnId = index2 + (++numberInt);
                 }else{
