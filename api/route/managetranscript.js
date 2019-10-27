@@ -168,25 +168,35 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
 router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
 
-    var id = parseInt(req.params.studentId);
-    var name = req.body.name;
-    var degree = req.body.degree;
-    var gpa = req.body.gpa;
-    var dateGrad = req.body.dateGrad;
-    var jsonData = req.body.jsonData;
-    // console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad);
+    var data = req.body.updateData;
+    //console.log("Update Data : ",data);
+    var id = parseInt(data.studentID);
+    var name = data.name;
+    var degree = data.degree;
+    var gpa = data.totalGradGPA;
+    var dateGrad = data.dateOfGraduation;
+    //var jsonData = JSON.stringify(data);
+    //console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad,' \n',jsonData);
     // console.log("Params : ",req.params.studentId);
     //console.log("Id: "+id+" JSON : "+jsonData)
+    addUniversityTranscript = (univertyShortName,transcriptData) => {
+        var transcriptHeader = univertyShortName+"_Transcript_"+id;
+        var allData = "{\""+transcriptHeader+"\":"+JSON.stringify(transcriptData)+"}";
+        return allData;
+    }
+
     (async () => {
+        var getShortName = await Manage.getUniversityShortName(req.userData.userid);
         var searchtranscript = await Manage.searchTranscript(req.userData.userid,id);
         var searchStatus = searchtranscript.searchStatus;
+        var transcriptData = addUniversityTranscript(getShortName,data);
         updateTranscript = async (id, jsonData) => {
             if (searchStatus) {
                 account = await web3.eth.getAccounts();
                 try {
                     await transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
                         (async () => {
-                            var updateDatabase = await Manage.setUpdateTranscript(id, req.userData.userid);
+                            var updateDatabase = await Manage.setUpdateTranscript(id,req.userData.userid);
                             if (!err) {
                                 if (updateDatabase) {
                                     res.json({ updateStatus: true, error: {} });
@@ -208,7 +218,7 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
             }
         }
 
-        await updateTranscript(id, jsonData);
+        await updateTranscript(id, transcriptData);
     })()
 
 })
