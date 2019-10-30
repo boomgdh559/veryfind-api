@@ -23,14 +23,14 @@ const bip39 = require("bip39");
 //const web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'));
 //const web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/v3/03a66aafd8f04156b8d48aac7060af71'));
 
-// const mnemonic = "shaft enough emerge shrug frame tuition winter wine slender short screen pulse";
-// const provider = new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/03a66aafd8f04156b8d48aac7060af71');
-// const web3 = new Web3(provider);
+const mnemonic = "shaft enough emerge shrug frame tuition winter wine slender short screen pulse";
+const provider = new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/03a66aafd8f04156b8d48aac7060af71');
+const web3 = new Web3(provider);
 
-// var transcriptAbi = [{"constant":false,"inputs":[{"name":"stdId","type":"uint256"},{"name":"stdName","type":"string"},{"name":"stdDegree","type":"string"},{"name":"stdGPA","type":"string"},{"name":"stdDateGrad","type":"string"},{"name":"json","type":"string"}],"name":"addTranscript","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"stdId","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"},{"name":"json","type":"string"}],"name":"editJSONTranscript","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"stdId","type":"uint256"}],"name":"showJSONTranscript","outputs":[{"name":"json","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"stdId","type":"uint256"}],"name":"showTranscript","outputs":[{"name":"id","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"},{"name":"pointer","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"ident","type":"bytes32"}],"name":"verifyQRCode","outputs":[{"name":"id","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
-// var transcriptAddr = "0x48574412cE88767EA8276a65853Fb896De73d672";
-// var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
-//web3.eth.defaultAccount = '0x0A938C420478974a64FA392CD2a0BA6Ce3F73bc3';
+var transcriptAbi = [{"constant":false,"inputs":[{"name":"stdId","type":"uint256"},{"name":"stdName","type":"string"},{"name":"stdDegree","type":"string"},{"name":"stdGPA","type":"string"},{"name":"stdDateGrad","type":"string"},{"name":"json","type":"string"}],"name":"addTranscript","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"stdId","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"},{"name":"json","type":"string"}],"name":"editJSONTranscript","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"stdId","type":"uint256"}],"name":"showJSONTranscript","outputs":[{"name":"json","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"stdId","type":"uint256"}],"name":"showTranscript","outputs":[{"name":"id","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"},{"name":"pointer","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"ident","type":"bytes32"}],"name":"verifyQRCode","outputs":[{"name":"id","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
+var transcriptAddr = "0x48574412cE88767EA8276a65853Fb896De73d672";
+var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
+web3.eth.defaultAccount = '0x0A938C420478974a64FA392CD2a0BA6Ce3F73bc3';
 
 
 
@@ -149,4 +149,4 @@ const bip39 = require("bip39");
 //     return data
 // }
 
-//module.exports = { web3, transcript };
+module.exports = { web3, transcript };
