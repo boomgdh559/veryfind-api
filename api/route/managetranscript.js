@@ -172,8 +172,8 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
     //console.log("Update Data : ",data);
     var id = parseInt(data.studentID);
     var name = data.name;
-    var degree = data.degree;
-    var gpa = data.totalGradGPA;
+    var degree = data.degreeConferred;
+    var gpa = `${data.totalGradGPA}`;
     var dateGrad = data.dateOfGraduation;
     //var jsonData = JSON.stringify(data);
     //console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad,' \n',jsonData);
