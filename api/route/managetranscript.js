@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
         cb(null, file.originalname);
     }
 })
-
+x
 const upload = multer({ storage });
 const checkAuthen = require('../middleware/authentication');
 
@@ -178,7 +178,7 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
     //var jsonData = JSON.stringify(data);
     //console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad,' \n',jsonData);
     // console.log("Params : ",req.params.studentId);
-    //console.log("Id: "+id+" JSON : "+jsonData)
+    //console.log("Id: "+id+" JSON : "+jsonData);
     addUniversityTranscript = (univertyShortName,transcriptData) => {
         var transcriptHeader = univertyShortName+"_Transcript_"+id;
         var allData = "{\""+transcriptHeader+"\":"+JSON.stringify(transcriptData)+"}";
