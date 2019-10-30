@@ -2,10 +2,10 @@ const Web3 = require('web3');
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const bip39 = require("bip39");
 
-const mnemonic = bip39.generateMnemonic();
-console.log("Word : ",mnemonic);
+// const mnemonic = bip39.generateMnemonic();
+// console.log("Word : ",mnemonic);
 
-console.log(bip39.mnemonicToSeedSync(mnemonic).toString('hex'))
+// console.log(bip39.mnemonicToSeedSync(mnemonic).toString('hex'))
 // if (typeof web3 !== 'undefined') {
 //     web3 = new Web3(web3.currentProvider);
 //     console.log("existing web3: provider " + web3);

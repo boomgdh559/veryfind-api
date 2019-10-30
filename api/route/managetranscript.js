@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
         cb(null, file.originalname);
     }
 })
-x
+
 const upload = multer({ storage });
 const checkAuthen = require('../middleware/authentication');
 
