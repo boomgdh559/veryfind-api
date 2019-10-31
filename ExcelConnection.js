@@ -100,8 +100,8 @@ module.exports.convertToJSON = (file,university) => {
 }
 
 // var json = JSON.parse((dataJSON('./ExcelFile/SIT-IT-Transcript.xlsx',"KMUTT")).studentJSONData);
-// var jsonCourse = json["KMUTT_Transcript_57130500060"].semester;
-// console.log(jsonCourse.map((data)=>data.semesterDetail.course));
+// var jsonCourse = json["KMUTT_Transcript_57130500060"];
+// console.log(jsonCourse);
 
 
 

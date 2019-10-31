@@ -4,7 +4,7 @@ const { web3, transcript } = require("../../Connection");
 const Verify = require("../model/verification");
 const checkAuthen = require('../middleware/authentication');
 
-router.get("/verify/:verifyAddress",checkAuthen,(req, res) => {
+router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
     verifyTranscript = async (address) => {
         const data = await transcript.methods.verifyQRCode(address).call((err, res) => {
             var status = false
@@ -22,21 +22,38 @@ router.get("/verify/:verifyAddress",checkAuthen,(req, res) => {
         return data;
     }
 
+
+
     (async () => {
         //console.log("Address : ",req.body.verifyAddress.toString())
         const jsonData = await verifyTranscript(req.params.verifyAddress.toString());
+        findData = async (transcriptid) => {
+            return await transcript.methods.showJSONTranscript(transcriptid).call((err, res) => {
+                if (!err) {
+                    return res;
+                }
+            })
+        }
+
         //console.log("Json Data : "+jsonData)
         if (jsonData.name !== '' || jsonData.id !== "0") {
             const verifyData = { studentId: jsonData.id, verifyDate: new Date() };
-            var newVerifyStatus = await Verify.setNewVerification(req.userData.userid,verifyData);
-            if(newVerifyStatus){
-                res.json({ fetchResult: jsonData,error:{} });
+            const getShortUniName = await Verify.findTranscriptHeader(jsonData.id);
+            //console.log("ID : ", jsonData.id);
+            const allData = await findData(jsonData.id);
+            var transcriptJSONData = JSON.parse(allData);
+            var pointer = getShortUniName + "_Transcript_" + jsonData.id;
+            var transcriptData = transcriptJSONData[pointer];
+            //console.log("Data : ",transcriptData);
+             var newVerifyStatus = await Verify.setNewVerification(req.userData.userid,verifyData);
+             if(newVerifyStatus){
+                res.json({ verifyResult: transcriptData,error:{} });
             }else{
-                res.json({ fetchResult :false ,error:{status:405,message:"Method Not Allowed"}});
+                res.json({ verifyResult :false ,error:{status:405,message:"Method Not Allowed"}});
             }
-            
+
         } else {
-            res.json({ fetchResult: false,error:{status:404,message:"Not Found"} })
+            //res.json({ fetchResult: false,error:{status:404,message:"Not Found"} })
         }
 
     })()
