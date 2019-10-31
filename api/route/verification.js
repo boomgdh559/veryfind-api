@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { web3, transcript } = require("../../Connection");
+const { HRWeb3Provider } = require("../../Connection");
+const hrProvider = HRWeb3Provider();
 const Verify = require("../model/verification");
 const checkAuthen = require('../middleware/authentication');
 
 router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
     verifyTranscript = async (address) => {
-        const data = await transcript.methods.verifyQRCode(address).call((err, res) => {
+        
+        const data = await hrProvider.transcript.methods.verifyQRCode(address).call((err, res) => {
             var status = false
             if (!err) {
                 //console.log(typeof res);
@@ -28,7 +30,7 @@ router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
         //console.log("Address : ",req.body.verifyAddress.toString())
         const jsonData = await verifyTranscript(req.params.verifyAddress.toString());
         findData = async (transcriptid) => {
-            return await transcript.methods.showJSONTranscript(transcriptid).call((err, res) => {
+            return await hrProvider.transcript.methods.showJSONTranscript(transcriptid).call((err, res) => {
                 if (!err) {
                     return res;
                 }

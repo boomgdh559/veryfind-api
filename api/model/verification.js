@@ -38,23 +38,26 @@ getTransId = async (transcriptId) => {
 
 getLastestVerifyId = async (attribute, table) => {
     //Must be space in sql string
-    var getLastestSql = "SELECT " + attribute + " FROM " + table + " ORDER BY " + attribute + " DESC LIMIT 1";
+    var getLastestSql = "SELECT " + attribute + " FROM " + table + " ORDER BY length(" + attribute + "), "+ attribute;
     var connect = await dbconnect();
     return connect.query(getLastestSql).then((result) => {
         data = result.map((data) => data.verifyid);
+        //console.log("Number : ",data)
         if (result.length <= 0) {
             connect.end().then(() => console.log("Close Connection in VerifyId"));
             return "verify01";
         } else {
             //console.log("Id : ", result);
             connect.end().then(() => console.log("Close Connection in VerifyId"));
-            var numberOrder = data[0].substring(6);
+            var numberOrder = data[result.length-1].substring(6);
+            
             //console.log("Number Order : ",data);
             increaseId = (numberOrder) => {
                 var index1 = "verify0";
                 var index2 = "verify";
                 var returnId = "";
                 var numberInt = parseInt(numberOrder);
+                console.log("Number Int : ",numberOrder)
                 //console.log("Number : ", result);
                 if (numberInt >= 9) {
                     returnId = index2 + (++numberInt);
@@ -100,7 +103,7 @@ findTranscriptHeader = async (transcriptId) => {
     // var data = {studentId:59130500045,verifyDate:new Date()};
     //console.log("Result : ",await setNewVerification("vf04",data));
     //console.log(await findTranscriptHeader(5913050045));
-
+    //console.log(await getLastestVerifyId("verifyid", "verification"));
 })()
 
 module.exports = { setNewVerification,findTranscriptHeader }

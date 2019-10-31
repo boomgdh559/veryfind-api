@@ -1,6 +1,6 @@
 const { dbconnect } = require('../../DatabaseConnection');
-const { web3, transcript } = require('../../Connection');
-
+//const { web3, transcript } = require('../../Connection');
+const {RegistrarWeb3Provider} = require("../../Connection");
 getUniversityShortName = async (userid) => {
     var connect = await dbconnect();
     var getUniversitySql = "SELECT u.universityshortname FROM university u JOIN universityregistrar ur on u.universityid = ur.universityid WHERE ur.userid = ?";
@@ -9,6 +9,21 @@ getUniversityShortName = async (userid) => {
         //console.log("Result : ",result);
         connect.end().then(()=>console.log("Close Connection in University"));
         return universityId[0];
+    })
+}
+
+getPrivateKey = async(userid) => { 
+    var connect = await dbconnect();
+    var getKeySql = "select privatekey from universityregistrar where userid = ?";
+    return await connect.query(getKeySql,userid).then((result)=>{
+        if(result.length === 0){
+            connect.end().then(()=>console.log("Close Connection in Get Private Key"));
+            return false
+        }else{
+            var data = result[0].privatekey;
+            connect.end().then(()=>console.log("Close Connection in Get Private Key"));
+            return data;
+        }
     })
 }
 
@@ -124,7 +139,7 @@ setUploadTranscript = async (transcriptData, userid) => {
 
 getLastestId = async (attribute, table) => {
     //Must be space in sql string
-    var getLastestSql = "SELECT " + attribute + " FROM " + table + " ORDER BY " + attribute + " DESC LIMIT 1";
+    var getLastestSql = "SELECT " + attribute + " FROM " + table + " ORDER BY length(" + attribute + "), "+ attribute;
     var connect = await dbconnect();
     return connect.query(getLastestSql).then((result) => {
         data = result.map((data) => data.manageid);
@@ -134,7 +149,7 @@ getLastestId = async (attribute, table) => {
         } else {
             //console.log("Id : ", result);
             connect.end();
-            var numberOrder = data[0].substring(6);
+            var numberOrder = data[result.length-1].substring(6);
             increaseId = (numberOrder) => {
                 var index1 = "manage0";
                 var index2 = "manage";
@@ -299,7 +314,9 @@ setQRCode = async (transcriptData) => {
 getDownloadTranscriptData = async (userid, transcriptid) => {
 
     var getShortUniName = await getUniversityShortName(userid);
-    const findData = await transcript.methods.showJSONTranscript(transcriptid).call((err, res) => {
+    var privateKey = await getPrivateKey(userid);
+    var registrarProvider = RegistrarWeb3Provider(privateKey);
+    const findData = await registrarProvider.transcript.methods.showJSONTranscript(transcriptid).call((err, res) => {
         if (!err) {
             return res;
         }
@@ -319,7 +336,6 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
 
     if (findData.length === 0) {
         return { downloadStatus: false, status: 'No ID that you insert' }
-
     } else {
         var transcriptJSONData = JSON.parse(findData);
         var pointer = getShortUniName + "_Transcript_" + transcriptid;
@@ -348,6 +364,7 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
     //     return status;
     //     //console.log("Result : ",await result)
     // })
+    //console.log("Private Key : ",await getPrivateKey("vf05"));
     // var qrData = await setQRCode([[59130500045],[59130500068]]);
     // console.log("Result : ",await qrData);
     //console.log("Download Result : ",await getDownloadTranscriptData("vf05", "59130500068"));
@@ -358,4 +375,4 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
 // setUploadTranscript("vf_5")
 //setNewTranscript("vf_5", "59130500068")
 
-module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode,getUniversityShortName, checkExist, getDownloadTranscriptData };
+module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode,getUniversityShortName, checkExist, getDownloadTranscriptData,getPrivateKey };

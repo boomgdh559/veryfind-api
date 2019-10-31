@@ -1,7 +1,8 @@
 const Web3 = require('web3');
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const bip39 = require("bip39");
-
+// const contractAddress = require("./smartcontract/migrations/2_deploy_contracts");
+// console.log("Address : ",contractAddress)
 // const mnemonic = bip39.generateMnemonic();
 // console.log("Word : ",mnemonic);
 
@@ -23,18 +24,41 @@ const bip39 = require("bip39");
 //const web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'));
 //const web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/v3/03a66aafd8f04156b8d48aac7060af71'));
 
-const mnemonic = "shaft enough emerge shrug frame tuition winter wine slender short screen pulse";
-const provider = new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/03a66aafd8f04156b8d48aac7060af71');
-const web3 = new Web3(provider);
+// const mnemonic = "shaft enough emerge shrug frame tuition winter wine slender short screen pulse";
+// const provider = new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/03a66aafd8f04156b8d48aac7060af71');
+// const web3 = new Web3(provider);
 
-var transcriptAbi = [{"constant":false,"inputs":[{"name":"stdId","type":"uint256"},{"name":"stdName","type":"string"},{"name":"stdDegree","type":"string"},{"name":"stdGPA","type":"string"},{"name":"stdDateGrad","type":"string"},{"name":"json","type":"string"}],"name":"addTranscript","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"stdId","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"},{"name":"json","type":"string"}],"name":"editJSONTranscript","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"stdId","type":"uint256"}],"name":"showJSONTranscript","outputs":[{"name":"json","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"stdId","type":"uint256"}],"name":"showTranscript","outputs":[{"name":"id","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"},{"name":"pointer","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"ident","type":"bytes32"}],"name":"verifyQRCode","outputs":[{"name":"id","type":"uint256"},{"name":"name","type":"string"},{"name":"degree","type":"string"},{"name":"gpa","type":"string"},{"name":"dateGrad","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
-var transcriptAddr = "0x48574412cE88767EA8276a65853Fb896De73d672";
-var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
 //web3.eth.defaultAccount = '0x0A938C420478974a64FA392CD2a0BA6Ce3F73bc3';
+const HRWeb3Provider = () => {
+    const infuraNode = 'https://rinkeby.infura.io/v3/03a66aafd8f04156b8d48aac7060af71';
+    const mnemonic = "shaft enough emerge shrug frame tuition winter wine slender short screen pulse";
+    const provider = new HDWalletProvider(mnemonic, infuraNode);
+    const web3 = new Web3(provider);
+    var transcriptAbi = [{ "constant": false, "inputs": [{ "name": "stdId", "type": "uint256" }, { "name": "stdName", "type": "string" }, { "name": "stdDegree", "type": "string" }, { "name": "stdGPA", "type": "string" }, { "name": "stdDateGrad", "type": "string" }, { "name": "json", "type": "string" }], "name": "addTranscript", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "stdId", "type": "uint256" }, { "name": "name", "type": "string" }, { "name": "degree", "type": "string" }, { "name": "gpa", "type": "string" }, { "name": "dateGrad", "type": "string" }, { "name": "json", "type": "string" }], "name": "editJSONTranscript", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "stdId", "type": "uint256" }], "name": "showJSONTranscript", "outputs": [{ "name": "json", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "stdId", "type": "uint256" }], "name": "showTranscript", "outputs": [{ "name": "id", "type": "uint256" }, { "name": "name", "type": "string" }, { "name": "degree", "type": "string" }, { "name": "gpa", "type": "string" }, { "name": "dateGrad", "type": "string" }, { "name": "pointer", "type": "bytes32" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "ident", "type": "bytes32" }], "name": "verifyQRCode", "outputs": [{ "name": "id", "type": "uint256" }, { "name": "name", "type": "string" }, { "name": "degree", "type": "string" }, { "name": "gpa", "type": "string" }, { "name": "dateGrad", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }];
+    //var transcriptAddr = "0x880835A17231f4EFfE73182bDcD35bB85a6f42b5";
+    var transcriptAddr = "0x48574412cE88767EA8276a65853Fb896De73d672";
+    var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
+    return {web3:web3,transcript:transcript};
+}
 
+const RegistrarWeb3Provider = (mnemonic) => {
+    const infuraNode = 'https://rinkeby.infura.io/v3/03a66aafd8f04156b8d48aac7060af71';
+    const provider = new HDWalletProvider(mnemonic, infuraNode);
+    const web3 = new Web3(provider);
+    var transcriptAbi = [{ "constant": false, "inputs": [{ "name": "stdId", "type": "uint256" }, { "name": "stdName", "type": "string" }, { "name": "stdDegree", "type": "string" }, { "name": "stdGPA", "type": "string" }, { "name": "stdDateGrad", "type": "string" }, { "name": "json", "type": "string" }], "name": "addTranscript", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "stdId", "type": "uint256" }, { "name": "name", "type": "string" }, { "name": "degree", "type": "string" }, { "name": "gpa", "type": "string" }, { "name": "dateGrad", "type": "string" }, { "name": "json", "type": "string" }], "name": "editJSONTranscript", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "stdId", "type": "uint256" }], "name": "showJSONTranscript", "outputs": [{ "name": "json", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "stdId", "type": "uint256" }], "name": "showTranscript", "outputs": [{ "name": "id", "type": "uint256" }, { "name": "name", "type": "string" }, { "name": "degree", "type": "string" }, { "name": "gpa", "type": "string" }, { "name": "dateGrad", "type": "string" }, { "name": "pointer", "type": "bytes32" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "ident", "type": "bytes32" }], "name": "verifyQRCode", "outputs": [{ "name": "id", "type": "uint256" }, { "name": "name", "type": "string" }, { "name": "degree", "type": "string" }, { "name": "gpa", "type": "string" }, { "name": "dateGrad", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }];
+    //var transcriptAddr = "0x880835A17231f4EFfE73182bDcD35bB85a6f42b5";
+    var transcriptAddr = "0x48574412cE88767EA8276a65853Fb896De73d672";
+    var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
+    return {web3:web3,transcript:transcript};
+}
+
+//var web3 = RegistrarWeb3Provider("shaft enough emerge shrug frame tuition winter wine slender short screen pulse");
+//var web3 = HRWeb3Provider();
 
 
 // showAccount = async () => {
+//     var hrprovider = HRWeb3Provider();
+//     var web3 = hrprovider.web3;
 //     console.log("Account : " + await web3.eth.getAccounts());
 // }
 
@@ -49,8 +73,8 @@ var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
 // })
 
 // const searchTranscript = async (id) => {
-
-//     const data = await transcript.methods.showTranscript(id).call((err,res)=> {
+//     var hrProvider = HRWeb3Provider();
+//     const data = await hrProvider.transcript.methods.showTranscript(id).call((err,res)=> {
 //         if(!err){
 //             return res;
 //         }else{
@@ -60,7 +84,7 @@ var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
 
 
 //     return data;
-    
+
 //     // if (typeof data !== 'undefined') {
 //     //     //   res.render('result', { transcriptData: { name: data[1], gpa: data[3], date: data[4] } });
 //     //     console.log("Name : " + data[1]);
@@ -72,7 +96,7 @@ var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
 // (async() => {
 //     try{
 //         isExist = true
-//         const name = await searchTranscript(59130500068);
+//         const name = await searchTranscript(59130500066);
 //         console.log("Name : "+name.name)
 //         if(name.name.length == 0){
 //             isExist = false
@@ -81,8 +105,8 @@ var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
 //     }catch(err){
 //         console.error(err);
 //     }
-    
-    
+
+
 // })()
 
 // var date = new Date();
@@ -149,4 +173,4 @@ var transcript = new web3.eth.Contract(transcriptAbi, transcriptAddr);
 //     return data
 // }
 
-module.exports = { web3, transcript };
+module.exports = { HRWeb3Provider, RegistrarWeb3Provider};

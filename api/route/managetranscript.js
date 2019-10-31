@@ -3,7 +3,7 @@ const router = express.Router();
 const fs = require("fs");
 const Manage = require('../model/managetranscript');
 const dataJSON = require('../../ExcelConnection');
-const { web3, transcript } = require("../../Connection");
+const { RegistrarWeb3Provider } = require("../../Connection");
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -20,7 +20,6 @@ const checkAuthen = require('../middleware/authentication');
 router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) => {
 
     const allFile = req.files;
-
     console.log("All File : ", allFile);
     if (req.files !== undefined) {
 
@@ -57,7 +56,10 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
         }
 
         newTranscript = async (id, name, degree, gpa, date, json) => {
-            account = await web3.eth.getAccounts();
+            var privateKey = await Manage.getPrivateKey(req.userData.userid);
+            var registrarProvider = RegistrarWeb3Provider(privateKey);
+            account = await registrarProvider.web3.eth.getAccounts();
+            console.log("Account : ",account);
             try {
                 return await transcript.methods.addTranscript(id, name, degree, gpa, date, json).send({ from: account[0] }, (err, transactionHash) => {
                     if (!err) {
@@ -190,9 +192,11 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
         var searchtranscript = await Manage.searchTranscript(req.userData.userid,id);
         var searchStatus = searchtranscript.searchStatus;
         var transcriptData = addUniversityTranscript(getShortName,data);
+        var privateKey = await Manage.getPrivateKey(req.userData.userid);
+        var registrarProvider = RegistrarWeb3Provider(privateKey);
         updateTranscript = async (id, jsonData) => {
             if (searchStatus) {
-                account = await web3.eth.getAccounts();
+                account = await registrarProvider.web3.eth.getAccounts();
                 try {
                     await transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
                         (async () => {
@@ -267,6 +271,7 @@ router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 router.get("/transcripts/fetchTranscript",checkAuthen, (req, res) => {
     var studentId = req.body.studentId;
     fetchTranscript = async (id) => {
+        // var privateKey = await Manage.getPrivateKey("")
         const data = await transcript.methods.showJSONTranscript(id).call((err, res) => {
             if (!err) {
                 //console.log(typeof res);
