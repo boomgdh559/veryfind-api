@@ -37,6 +37,7 @@ checkExist = async (transcriptId) => {
             
             //console.log("Count Row : ",countRow);
             if (countRow[0] === 1) {
+                connect.end().then(()=>console.log("Close Connection in Check"));
                 return ++countDuplicateRow;
             }
 
@@ -262,7 +263,8 @@ searchTranscript = async (userid,studentId) => {
 setQRCode = async (transcriptData) => {
 
     var connect = await dbconnect();
-
+    var privateKey = await getPrivateKey(userid);
+    var registrarProvider = RegistrarWeb3Provider(privateKey);
     //console.log("Transcript Data : ",transcriptData);
     var allId = transcriptData.map((result) => {
         newId = result[0];
@@ -270,7 +272,7 @@ setQRCode = async (transcriptData) => {
     })
     //console.log("ID Data : ",allId)
     var allQRCode = allId.map(async (transid) => {
-        var addressData = await transcript.methods.showTranscript(transid).call((err, res) => {
+        var addressData = await registrarProvider.transcript.methods.showTranscript(transid).call((err, res) => {
             if (!err) {
                 return res;
             } else {

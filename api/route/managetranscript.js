@@ -61,7 +61,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             account = await registrarProvider.web3.eth.getAccounts();
             console.log("Account : ",account);
             try {
-                return await transcript.methods.addTranscript(id, name, degree, gpa, date, json).send({ from: account[0] }, (err, transactionHash) => {
+                return await registrarProvider.transcript.methods.addTranscript(id, name, degree, gpa, date, json).send({ from: account[0] }, (err, transactionHash) => {
                     if (!err) {
                         status = true;
                         hash = transactionHash;
@@ -198,7 +198,7 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
             if (searchStatus) {
                 account = await registrarProvider.web3.eth.getAccounts();
                 try {
-                    await transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
+                    await registrarProvider.transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
                         (async () => {
                             var updateDatabase = await Manage.setUpdateTranscript(id,req.userData.userid);
                             if (!err) {
@@ -270,8 +270,11 @@ router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 
 router.get("/transcripts/fetchTranscript",checkAuthen, (req, res) => {
     var studentId = req.body.studentId;
+    
     fetchTranscript = async (id) => {
         // var privateKey = await Manage.getPrivateKey("")
+        var privateKey = await Manage.getPrivateKey(req.userData.userid);
+        var registrarProvider = RegistrarWeb3Provider(privateKey);
         const data = await transcript.methods.showJSONTranscript(id).call((err, res) => {
             if (!err) {
                 //console.log(typeof res);
