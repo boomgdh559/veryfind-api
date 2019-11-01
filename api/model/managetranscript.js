@@ -234,7 +234,7 @@ searchTranscript = async (userid,studentId) => {
 
     var connect = await dbconnect();
     var getShortName = await getUniversityShortName(userid);
-    var searchStudentId = getShortName+"%" + studentId;
+    var searchStudentId = getShortName+"%" + studentId+"%";
     
     var searchTranscriptSql = "SELECT * FROM transcript where transid like ?";
 
@@ -248,19 +248,19 @@ searchTranscript = async (userid,studentId) => {
                     qrCode: data.qrcode
                 }
             })
-            connect.end().then(()=>console.log("Close Connection"));
+            connect.end().then(()=>console.log("Close Connection in Search"));
             //console.log("All Data : ",allData);
             return { searchStatus: true, searchData: allData }
 
         } else {
-            connect.end().then(()=>console.log("Close Connection"));
+            connect.end().then(()=>console.log("Close Connection in Search"));
             return { searchStatus: false,searchData: {} }
         }
     })
 
 }
 
-setQRCode = async (transcriptData) => {
+setQRCode = async (userid,transcriptData) => {
 
     var connect = await dbconnect();
     var privateKey = await getPrivateKey(userid);

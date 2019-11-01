@@ -55,38 +55,52 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             })
         }
 
-        newTranscript = async (id, name, degree, gpa, date, json) => {
-            var privateKey = await Manage.getPrivateKey(req.userData.userid);
-            var registrarProvider = RegistrarWeb3Provider(privateKey);
-            account = await registrarProvider.web3.eth.getAccounts();
-            console.log("Account : ",account);
+        newTranscript = async (registrarProvider,id, name, degree, gpa, date, json) => {
+    
+            var account = await registrarProvider.web3.eth.getAccounts();
+            var firstNoune = registrarProvider.web3.eth.getTransactionCount(account[0]);
+            console.log("Account : ", account);
+            console.log("Nounce : ", await firstNoune);
             try {
-                return await registrarProvider.transcript.methods.addTranscript(id, name, degree, gpa, date, json).send({ from: account[0] }, (err, transactionHash) => {
-                    if (!err) {
+                return await registrarProvider.transcript.methods.addTranscript(id, name, degree, gpa, date, json).send({ from: account[0] }).then((receipt) => {
+                    console.log("Receipt : ", receipt.status);
+                    if (receipt.status) {
                         status = true;
-                        hash = transactionHash;
-
+                        //hash = transactionHash;
                     } else {
-                        status = false;
-                        hash = "No Transaction Hash"
+                        status = true;
+                        //hash = transactionHash;
                     }
-                    //console.log("Status : "+status)
-                    return { status: status, transactionHash: hash }
-                });
+                    return { status: status }
+                    // if (!err) {
+                    //     status = true;
+                    //     hash = transactionHash;
+
+                    // } else {
+                    //     status = false;
+                    //     hash = "No Transaction Hash"
+                    // }
+                    // //console.log("Status : "+status)
+                    
+                    
+
+                })
 
             } catch (err) {
-                console.log("" + err);
+                console.error("" + err);
             }
 
         }
 
-        addTranscript = (jsonData) => {
+        addTranscript = async(jsonData) => {
             //console.log("Here")
             jsonLength = jsonData.length;
             console.log("JSON Length : " + jsonLength)
             count = 0;
             allHash = [];
-            jsonData.map((data) => {
+            var privateKey = await Manage.getPrivateKey(req.userData.userid);
+            var registrarProvider = RegistrarWeb3Provider(privateKey);
+            jsonData.map(async(data) => {
                 //console.log("Here 1")
 
                 id = data.studentId;
@@ -95,10 +109,10 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                 gpa = data.studentGPA;
                 date = data.studentDateGrad;
                 jsonInput = data.studentJSONData;
-
-                newTranscript(id, name, degree, gpa, date, jsonInput).then((result) => {
-                    allStatus = result.status;
-                    //console.log("Status : ",result.status);     
+                
+                newTranscript(registrarProvider,id, name, degree, gpa, date, jsonInput).then(async (result) => {
+                    allStatus = await result.status;
+                    console.log("Status 1 : " + id + " : ", result.status);
                     try {
                         count++;
                         console.log("Count : " + count)
@@ -106,7 +120,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                             if (allStatus) {
                                 (async () => {
                                     var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, req.userData.userid);
-                                    var updateQRCode = await Manage.setQRCode(allStudentId);
+                                    var updateQRCode = await Manage.setQRCode(req.userData.userid,allStudentId);
                                     if (uploadDatabase && updateQRCode) {
                                         res.json({ percent: 100, status: "success", error: {} })
                                         console.log("100 percent success")
@@ -181,17 +195,17 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
     //console.log("Name : ",name+' '+degree+' '+gpa+' '+dateGrad,' \n',jsonData);
     // console.log("Params : ",req.params.studentId);
     //console.log("Id: "+id+" JSON : "+jsonData);
-    addUniversityTranscript = (univertyShortName,transcriptData) => {
-        var transcriptHeader = univertyShortName+"_Transcript_"+id;
-        var allData = "{\""+transcriptHeader+"\":"+JSON.stringify(transcriptData)+"}";
+    addUniversityTranscript = (univertyShortName, transcriptData) => {
+        var transcriptHeader = univertyShortName + "_Transcript_" + id;
+        var allData = "{\"" + transcriptHeader + "\":" + JSON.stringify(transcriptData) + "}";
         return allData;
     }
 
     (async () => {
         var getShortName = await Manage.getUniversityShortName(req.userData.userid);
-        var searchtranscript = await Manage.searchTranscript(req.userData.userid,id);
+        var searchtranscript = await Manage.searchTranscript(req.userData.userid, id);
         var searchStatus = searchtranscript.searchStatus;
-        var transcriptData = addUniversityTranscript(getShortName,data);
+        var transcriptData = addUniversityTranscript(getShortName, data);
         var privateKey = await Manage.getPrivateKey(req.userData.userid);
         var registrarProvider = RegistrarWeb3Provider(privateKey);
         updateTranscript = async (id, jsonData) => {
@@ -200,7 +214,7 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
                 try {
                     await registrarProvider.transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
                         (async () => {
-                            var updateDatabase = await Manage.setUpdateTranscript(id,req.userData.userid);
+                            var updateDatabase = await Manage.setUpdateTranscript(id, req.userData.userid);
                             if (!err) {
                                 if (updateDatabase) {
                                     res.json({ updateStatus: true, error: {} });
@@ -231,7 +245,7 @@ router.get("/transcripts", checkAuthen, (req, res) => {
 
     //List Id from Database
     var studentId = req.query.searchId;
-    
+
     (async () => {
         var searchtranscript = await Manage.searchTranscript(req.userData.userid, studentId);
         var searchStatus = searchtranscript.searchStatus;
@@ -240,7 +254,7 @@ router.get("/transcripts", checkAuthen, (req, res) => {
             res.json({ searchData: searchData, error: {} });
         } else {
             res.json({
-                searchData: searchData, 
+                searchData: searchData,
                 error: {
                     status: 404,
                     message: "Not Found"
@@ -268,9 +282,9 @@ router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 
 })
 
-router.get("/transcripts/fetchTranscript",checkAuthen, (req, res) => {
+router.get("/transcripts/fetchTranscript", checkAuthen, (req, res) => {
     var studentId = req.body.studentId;
-    
+
     fetchTranscript = async (id) => {
         // var privateKey = await Manage.getPrivateKey("")
         var privateKey = await Manage.getPrivateKey(req.userData.userid);
@@ -288,7 +302,7 @@ router.get("/transcripts/fetchTranscript",checkAuthen, (req, res) => {
 
     (async () => {
         const getShortName = await Manage.getUniversityShortName(req.userData.userid);
-        const jsonData = await fetchTranscript(getShortName+studentId);
+        const jsonData = await fetchTranscript(getShortName + studentId);
         if (jsonData !== '' || jsonData.length != 0) {
             res.json({ fetchResult: jsonData, error: {} });
         } else {
