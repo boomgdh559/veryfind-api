@@ -37,7 +37,7 @@ router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
             })
         }
 
-        //console.log("Json Data : "+jsonData)
+        //console.log("Json Data : "+jsonData.id)
         if (jsonData.name !== '' || jsonData.id !== "0") {
             const verifyData = { studentId: jsonData.id, verifyDate: new Date() };
             const getShortUniName = await Verify.findTranscriptHeader(jsonData.id);
@@ -55,7 +55,7 @@ router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
             }
 
         } else {
-            //res.json({ fetchResult: false,error:{status:404,message:"Not Found"} })
+            res.json({ verifyResult: false,error:{status:404,message:"Not Found"} })
         }
 
     })()
