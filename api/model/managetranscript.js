@@ -291,14 +291,12 @@ setQRCode = async (transcriptData) => {
         return await connect.query(updateQRSql, qrData).then((result) => {
             if(++index !== allQRCode.length){
                 if (result.affectedRows >= 1) {
-                    
                     return true;
                 } else {
-                    
                     return false;
                 }
             }else{
-                connect.end().then(()=>console.log("Close Connection in Update"));
+                connect.end().then(()=>console.log("Close Connection in QR Update"));
             }
             
         })
