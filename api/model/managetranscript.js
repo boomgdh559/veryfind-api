@@ -34,16 +34,17 @@ checkExist = async (transcriptId) => {
     var checkExistStatus = transcriptId.map(async (idData,index) => {
         var allStatus = await connect.query(checkExistSql, "%" + idData).then((result) => {
             var countRow = result.map((data) => data.countrow);
-            
+            console.log("Result : ",result)
             //console.log("Count Row : ",countRow);
-            if (countRow[0] === 1) {
-                connect.end().then(()=>console.log("Close Connection in Check"));
+            if (countRow[0] >= 1) {
+                // connect.end().then(()=>console.log("Close Connection in Check"));
+                if(++index === transcriptId.length){
+                    connect.end().then(()=>console.log("Close Connection in Check"));
+                }
                 return ++countDuplicateRow;
             }
 
-            if(++index === transcriptId.length){
-                connect.end().then(()=>console.log("Close Connection in Check"));
-            }
+            
         })
 
         return allStatus;
