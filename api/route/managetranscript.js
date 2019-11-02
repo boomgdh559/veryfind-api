@@ -42,7 +42,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
         })
         console.log("All Student Id : ", allStudentId)
-
+        
         // console.log(jsonData.map((data,index)=>data.studentId))
 
         deleteExcelFile = (file) => {
@@ -100,7 +100,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             allHash = [];
             var privateKey = await Manage.getPrivateKey(req.userData.userid);
             var registrarProvider = RegistrarWeb3Provider(privateKey);
-            jsonData.map(async(data) => {
+            jsonData.map(async(data,index) => {
                 //console.log("Here 1")
 
                 id = data.studentId;
@@ -108,8 +108,10 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                 degree = data.studentDegree;
                 gpa = data.studentGPA;
                 date = data.studentDateGrad;
+                faculty = data.studentFaculty;
                 jsonInput = data.studentJSONData;
-                
+                allStudentUpload[index].push(faculty);
+                //console.log("All Json Upload : index = "+index," : ",allStudentUpload);
                 newTranscript(registrarProvider,id, name, degree, gpa, date, jsonInput).then(async (result) => {
                     allStatus = await result.status;
                     console.log("Status 1 : " + id + " : ", result.status);
@@ -119,7 +121,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                         if (count === jsonLength) {
                             if (allStatus) {
                                 (async () => {
-                                    var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, req.userData.userid);
+                                    var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload,req.userData.userid);
                                     var updateQRCode = await Manage.setQRCode(req.userData.userid,allStudentId);
                                     if (uploadDatabase && updateQRCode) {
                                         res.json({ percent: 100, status: "success", error: {} })
@@ -146,7 +148,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
                 // newTranscript(id, name, degree, gpa, date, jsonInput).then((statusResult, err) => {
                 //   console.log("Here 2")
-                //   
+                  
 
                 // });
 

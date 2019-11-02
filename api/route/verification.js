@@ -40,7 +40,7 @@ router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
         }
         var checkQrCode = checkByte32(req.params.verifyAddress.toString());
         //console.log("Address : ",req.body.verifyAddress.toString())
-        if(checkQrCode){
+        if (checkQrCode) {
             const jsonData = await verifyTranscript(req.params.verifyAddress.toString());
             findData = async (transcriptid) => {
                 return await hrProvider.transcript.methods.showJSONTranscript(transcriptid).call((err, res) => {
@@ -49,7 +49,7 @@ router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
                     }
                 })
             }
-    
+
             //console.log("Json Data : "+jsonData.id)
             if (jsonData.name !== '' || jsonData.id !== "0") {
                 const verifyData = { studentId: jsonData.id, verifyDate: new Date() };
@@ -66,17 +66,33 @@ router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
                 } else {
                     res.json({ verifyResult: false, error: { status: 405, message: "Method Not Allowed" } });
                 }
-    
+
             } else {
                 res.json({ verifyResult: false, error: { status: 404, message: "Not Found" } })
             }
-        }else{
-            res.json({ verifyResult: false, error: {  status: 405, message: "Method Not Allowed" } })
+        } else {
+            res.json({ verifyResult: false, error: { status: 405, message: "Method Not Allowed" } })
         }
-        
+
 
     })()
 
+})
+
+router.get("/verify", checkAuthen, (req, res) => {
+    (async () => {
+        //console.log("User Id : ",req.userData.userid)
+        var allHistory = await Verify.getVerifyHistory(req.userData.userid);
+        if(allHistory.length >= 1){
+            allHistory.map(async(data,index)=>{
+                if(index === allHistory.length-1){
+                    res.json({verifyHistory:await data,error:{}});
+                }
+            })
+        }else{
+            res.json({verifyHistory:[],error:{status:"404",message:"Not Found"}});
+        }
+    })()
 })
 
 module.exports = router;

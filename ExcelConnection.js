@@ -86,8 +86,9 @@ formatterJSON = (data,university) => {
     degree = JSON.parse(jsonGeneral).degreeConferred;
     gpa = JSON.parse(jsonGeneral).totalGradGPA;
     gpa = gpa.toString();
+    faculty = JSON.parse(jsonGeneral).faculty;
     date = JSON.parse(jsonGeneral).dateOfGraduation;
-    return {studentId:id,studentName:name,studentDegree : degree,studentGPA: gpa,studentDateGrad:date,studentJSONData : allTranscriptJSON};
+    return {studentId:id,studentName:name,studentDegree : degree,studentGPA: gpa,studentDateGrad:date,studentFaculty:faculty,studentJSONData : allTranscriptJSON};
 }
 
 dataJSON = (file,university) => {

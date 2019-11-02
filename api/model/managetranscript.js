@@ -65,12 +65,13 @@ setUploadTranscript = async (transcriptData, userid) => {
     //console.log("Uni Short : ",universityShortName);
 
 
-    var newTranscriptSql = "INSERT INTO transcript (transid,dateOfUpload) values (?,?)";
+    var newTranscriptSql = "INSERT INTO transcript (transid,faculty,dateOfUpload) values (?,?,?)";
     //console.log(transcriptData);
     var allData = transcriptData.map((result) => {
         newId = universityShortName + result[0];
         date = result[1];
-        return [newId, date];
+        faculty = result[2];
+        return [newId,faculty,date];
     })
     var allId = allData.map((data) => {
         newId = data[0]
@@ -244,6 +245,7 @@ searchTranscript = async (userid,studentId) => {
             var allData = result.map((data) => {
                 return {
                     transid: data.transid,
+                    faculty: data.faculty,
                     dateOfUpload: data.dateOfUpload,
                     qrCode: data.qrcode
                 }
