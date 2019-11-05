@@ -8,7 +8,7 @@ const dbconnect = async () => {
         user: 'veryfind',
         password: 'Veryfind_026',
         database: 'veryfine',
-        connectionLimit: 7
+        connectionLimit: 200
     })
 
     return dbPool;

@@ -1,21 +1,40 @@
 const { dbconnect } = require("../../DatabaseConnection");
 
-getLastestId = async (attribute, table) => {
+getLastestUserId = async (attribute, table) => {
     //Must be space in sql string
-    var getLastestSql = "SELECT " + attribute + " FROM " + table + " ORDER BY " + attribute + " DESC LIMIT 1";
+    var getLastestSql = "SELECT " + attribute + " FROM " + table + " ORDER BY length(" + attribute + "), " + attribute;
     var connect = await dbconnect();
     return connect.query(getLastestSql).then((result) => {
         data = result.map((data) => data.userid);
-        var numberOrder = data[0].substring(3);
-        increaseId = (numberOrder) => {
-            var index = "vf0";
-            var numberInt = parseInt(numberOrder);
-            //console.log("Number INT : ",numberInt+" "+numberOrder);
-            return index + (++numberInt);
+        //console.log("Number : ",data)
+        if (result.length <= 0) {
+            connect.end().then(() => console.log("Close Connection in UserId"));
+            return "vf01";
+        } else {
+            //console.log("Id : ", result);
+            connect.end().then(() => console.log("Close Connection in UserId"));
+            var numberOrder = data[result.length - 1].substring(2);
+
+            //console.log("Number Order : ",data);
+            increaseId = (numberOrder) => {
+                var index1 = "vf0";
+                var index2 = "vf";
+                var returnId = "";
+                var numberInt = parseInt(numberOrder);
+                console.log("Number Int : ", numberOrder)
+                //console.log("Number : ", result);
+                if (numberInt >= 9) {
+                    returnId = index2 + (++numberInt);
+                } else {
+                    returnId = index1 + (++numberInt);
+                }
+                return returnId;
+                //console.log("Number INT : ",numberInt+" "+numberOrder);
+
+            }
+            var newUserId = increaseId(numberOrder);
+            return newUserId;
         }
-        var newUserId = increaseId(numberOrder);
-        connect.end().then(()=>console.log("Close Connection in Lastest Id"));
-        return newUserId;
     })
 
 
@@ -70,7 +89,7 @@ setHumanResourceUser = async (firstname, surname, gender, dob, tel, email, passw
     // console.log("Staff Id : ",staffid);
 
 
-    var newUserId = await getLastestId("userid", "user");
+    var newUserId = await getLastestUserId("userid", "user");
     var companyid = await findCompanyIdByCompanyRegister(companyregisnumber);
     //var setUserStatus = false;
     //var setHRStatus = false;
@@ -112,7 +131,7 @@ setUniversityRegistrarUser = async (firstname, surname, gender, dob, tel, email,
 
     //     var getLastestSql = "SELECT userid FROM user ORDER BY userid DESC LIMIT 1";
     var connect = await dbconnect();
-    var newUserId = await getLastestId("userid", "user");
+    var newUserId = await getLastestUserId("userid", "user");
     var newUserSql = "INSERT INTO user (userid,firstname,surname,gender,dob,tel,email,password,dateofregister) VALUES (?,?,?,?,?,?,?,?,?)";
     var newUser = [newUserId, firstname, surname, gender, dob, tel, email, password, dateRegister]
     //var newHRUserSql = "INSERT INTO humanresourcestaff (userid,companyid,position) VALUES (?,?,?)"
@@ -210,7 +229,7 @@ checkRegistrarUser = async(email,password) => {
     //console.log(await checkHRUser("saknarong@veryfine.com","letitgo123"));
     //console.log(await checkRegistrarUser("sineenad@veryfind.com","tanja"));
     //console.log(await checkUserExist("jurich","Sangprasert","purich@veryfine.com"));
-    //console.log("Userid : ", await getLastestId("userid", "user"));
+    //console.log("Userid : ", await getLastestUserId("userid", "user"));
     // console.log("HR Result : ",await setHumanResourceUser("Saknarong", "Pongthonglang", "Male", new Date(1997, 8, 12), "012-0345678", "saknarong@veryfind.com",
     // "letitgo123", new Date(), "0105558193432", "Human Resource's Staff"));
 

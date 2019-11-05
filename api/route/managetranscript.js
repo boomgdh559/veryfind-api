@@ -166,10 +166,10 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
         (async () => {
             var checkDuplicateStatus = await Manage.checkExist(checkDuplicateRowId);
-            if (checkDuplicateStatus) {
+            if (checkDuplicateStatus.checkStatus) {
                 addTranscript(jsonData)
             } else {
-                res.json({ uploadStatus: {}, error: { status: 405, message: "Method Not Allowed" } });
+                res.json({ uploadStatus: {},duplicateId:checkDuplicateStatus.duplicateId, error: { status: 405, message: "Method Not Allowed" } });
                 allFile.map((file) => {
                     deleteExcelFile(file);
                 })
@@ -182,6 +182,14 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
         res.json({ uploadFile: {}, error: { status: 404, message: "Not Found" } })
     }
 
+})
+
+router.get('/dashboard',checkAuthen,(req,res)=>{
+    (async() => {
+        var allDashboardData = await Manage.getTotalDashboard();
+        res.json({totalUpload:allDashboardData.totalUpload,totalUpdate:allDashboardData.totalUpdate,error:{}});
+    })()
+    
 })
 
 router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
@@ -247,16 +255,18 @@ router.get("/transcripts", checkAuthen, (req, res) => {
 
     //List Id from Database
     var studentId = req.query.searchId;
-
+    
     (async () => {
         var searchtranscript = await Manage.searchTranscript(req.userData.userid, studentId);
+        var getShortName = await Manage.getUniversityShortName(req.userData.userid);
         var searchStatus = searchtranscript.searchStatus;
         var searchData = searchtranscript.searchData;
         if (searchStatus) {
-            res.json({ searchData: searchData, error: {} });
+            res.json({ searchData: searchData,uniShortName:getShortName, error: {} });
         } else {
             res.json({
                 searchData: searchData,
+                uniShortName:{},
                 error: {
                     status: 404,
                     message: "Not Found"
