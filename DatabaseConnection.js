@@ -3,7 +3,7 @@ const mariadb = require('mariadb');
 
 const dbconnect = async () => {
     var dbPool = await mariadb.createPool({
-        host: '18.139.229.175',
+        host: '52.221.216.39',
         port: '3306',
         user: 'veryfind',
         password: 'Veryfind_026',
