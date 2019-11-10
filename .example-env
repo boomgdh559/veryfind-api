@@ -9,4 +9,6 @@ PORT=0000
 
 SECRET_KEY= your_secret_key
 
+SALT_ROUND=10
+
 INFURA_NODE= your_infura_node

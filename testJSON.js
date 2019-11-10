@@ -1,5 +1,18 @@
-const dotenv = require("dotenv").config();
-console.log(process.env)
+// const bcrypt = require('bcrypt');
+// const saltRound = 10;
+
+
+// (async()=>{
+//     const hashPassword = await bcrypt.hash("tanja",saltRound).then((result)=>{
+//         return result;
+//     })
+//     console.log(hashPassword)
+//     // await bcrypt.compare("ta",hashPassword).then((result)=>{
+//     //     console.log("Result : ",result);
+//     // })
+    
+// })()
+
 
 // const data = {
 // 	KMUTT_Transcript_57130500060:{
