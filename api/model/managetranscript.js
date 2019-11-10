@@ -1,6 +1,7 @@
 const { dbconnect } = require('../../DatabaseConnection');
-//const { web3, transcript } = require('../../Connection');
 const { RegistrarWeb3Provider } = require("../../Connection");
+
+
 getUniversityShortName = async (userid) => {
     var connect = await dbconnect();
     var getUniversitySql = "SELECT u.universityshortname FROM university u JOIN universityregistrar ur on u.universityid = ur.universityid WHERE ur.userid = ?";
@@ -300,7 +301,7 @@ searchTranscript = async (userid, studentId) => {
                     manageDate: data.managedate
                 }
             })
-            
+
             //console.log("All Data : ",allData);
             return { searchStatus: true, searchData: allData }
 
@@ -338,9 +339,11 @@ setQRCode = async (userid, transcriptData) => {
     })
 
     var updateQRSql = "UPDATE transcript SET qrcode = ? WHERE transid like ?";
+    
     var updateQRStatus = allQRCode.map(async (data, index) => {
         var qrData = await data;
         return await connect.query(updateQRSql, qrData).then((result) => {
+            //console.log("All QR Code : index"," = ",index,allQRCode.length);
             if (++index !== allQRCode.length) {
                 if (result.affectedRows >= 1) {
                     return true;
@@ -362,6 +365,19 @@ setQRCode = async (userid, transcriptData) => {
     return allUpdateQRStatus;
 
 }
+
+getAllUniversity = async() => {
+    var connect = await dbconnect();
+    var getAllUniversitySql = "SELECT universityname FROM university";
+    const getAllUniversity = await connect.query(getAllUniversitySql).then((result) => {
+        const allUniversity = result.map((data)=>data.universityname);
+        connect.end().then(() => console.log("Close Connection in All University"));
+        return allUniversity;
+        
+    })
+    return getAllUniversity;
+}
+
 
 getDownloadTranscriptData = async (userid, transcriptid) => {
 
@@ -398,6 +414,8 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
 }
 
 (async () => {
+    //console.log("ENV : ",process.env);
+    //console.log(await getAllUniversity());
     //console.log("Dashboard : ", await getTotalDashboard());
     //var data =  [[59130500055, new Date(),"IT"], [59130500032, new Date(),"IT"],[59130500011, new Date(),"IT"]];
     //console.log("Upload Result : ",await setUploadTranscript(data,"vf05"))
@@ -432,4 +450,4 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
 // setUploadTranscript("vf_5")
 //setNewTranscript("vf_5", "59130500068")
 
-module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, getUniversityShortName, checkExist, getDownloadTranscriptData, getPrivateKey,getTotalDashboard };
+module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, getUniversityShortName, checkExist, getDownloadTranscriptData, getPrivateKey, getTotalDashboard,getAllUniversity };

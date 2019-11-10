@@ -294,6 +294,14 @@ router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 
 })
 
+router.get("/university",(req,res)=>{
+    (async()=>{
+        var allUniversity = await Manage.getAllUniversity();
+        // console.log("All : ",allUniversity);
+        res.json({allUniversity,error:{}});
+    })()
+    
+})
 router.get("/transcripts/fetchTranscript", checkAuthen, (req, res) => {
     var studentId = req.body.studentId;
 

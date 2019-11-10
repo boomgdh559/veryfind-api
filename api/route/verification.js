@@ -95,4 +95,11 @@ router.get("/verify", checkAuthen, (req, res) => {
     })()
 })
 
+router.get("/company",(req,res)=>{
+    (async()=>{
+        const allCompany = await Verify.getAllCompany();
+        res.json({allCompany,error:{}});
+    })()
+})
+
 module.exports = router;

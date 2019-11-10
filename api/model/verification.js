@@ -35,6 +35,17 @@ getTransId = async (transcriptId) => {
         return transId[0];
     })
 }
+getAllCompany = async() => {
+    var connect = await dbconnect();
+    var getAllCompanySql = "SELECT companyname FROM company";
+    const getAllCompany = await connect.query(getAllCompanySql).then((result) => {
+        const allCompany = result.map((data)=>data.companyname);
+        connect.end().then(() => console.log("Close Connection in All Company"));
+        return allCompany;
+        
+    })
+    return getAllCompany;
+}
 
 getAllVerifyTranscript = async (userid) => {
     var connect = await dbconnect();
@@ -172,4 +183,4 @@ findTranscriptHeader = async (transcriptId) => {
     //console.log(await getLastestVerifyId("verifyid", "verification"));
 })()
 
-module.exports = { setNewVerification, findTranscriptHeader,getVerifyHistory }
+module.exports = { setNewVerification, findTranscriptHeader,getVerifyHistory,getAllCompany }

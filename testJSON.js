@@ -1,3 +1,5 @@
+const dotenv = require("dotenv").config();
+console.log(process.env)
 
 // const data = {
 // 	KMUTT_Transcript_57130500060:{

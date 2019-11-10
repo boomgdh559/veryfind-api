@@ -1,16 +1,15 @@
 const mariadb = require('mariadb');
-
+const dotenv = require('dotenv').config();
 
 const dbconnect = async () => {
     var dbPool = await mariadb.createPool({
-        host: '52.221.216.39',
-        port: '3306',
-        user: 'veryfind',
-        password: 'Veryfind_026',
-        database: 'veryfine',
-        connectionLimit: 7
+        host: process.env.DB_Host,
+        port: process.env.DB_Port,
+        user: process.env.DB_User,
+        password: process.env.DB_Password,
+        database: process.env.DB_Database,
+        connectionLimit: process.env.DB_ConnectionLimit
     })
-
     return dbPool;
 }
 

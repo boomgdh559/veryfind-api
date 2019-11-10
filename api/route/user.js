@@ -2,27 +2,30 @@ const express = require("express");
 const router = express.Router();
 const User = require('../model/user');
 const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv").config();
 
 router.post("/mobile/signup", (req, res) => {
     var firstname = req.body.firstname;
     var surname = req.body.surname;
     var gender = req.body.gender;
     var dob = req.body.dob;
-    var tel = req.body.tel;
+    var tel = req.body.tel.toString();
     var email = req.body.email;
     var password = req.body.password;
     var dateRegister = req.body.dateRegister;
-    var companyName = req.body.companyname;
+    var companyRegister = req.body.companyRegister;
     var position = req.body.position;
 
     if (firstname !== 'undefined' || surname !== 'undefined'
         || gender !== 'undefined' || dob !== 'undefined' || tel !== 'undefined'
         || email !== 'undefined' || password !== 'undefined' || dateRegister !== 'undefined') {
         (async () => {
+            //console.log("Tel Info : ",tel.length);
+            //res.json(req.body)
             var checkUser = await User.checkUserExist(firstname, surname, email);
             var checkUserExistStatus = checkUser.checkUserExist;
             if (!checkUserExistStatus) {
-                var setHRStatus = await User.setHumanResourceUser(firstname, surname, gender, dob, tel, email, password, dateRegister, companyName, position);
+                var setHRStatus = await User.setHumanResourceUser(firstname, surname, gender, dob, tel, email, password, dateRegister, companyRegister, position);
                 if (setHRStatus) {
                     res.json({ regisHRStatus: true, error: {} });
                 } else {
@@ -42,7 +45,7 @@ router.post("/web/signup", (req, res) => {
     var surname = req.body.surname;
     var gender = req.body.gender;
     var dob = req.body.dob;
-    var tel = req.body.tel;
+    var tel = req.body.tel.toString();
     var email = req.body.email;
     var password = req.body.password;
     var dateRegister = req.body.dateRegister;
@@ -85,7 +88,7 @@ router.post('/web/login', (req, res) => {
 
         if (authenRegistrarStatus) {
             if (authenStatus) {
-                const token = jwt.sign(authen.loginData, "VeryFine System", { expiresIn: "10h" })
+                const token = jwt.sign(authen.loginData, process.env.SECRET_KEY, { expiresIn: "10h" })
                 //console.log("Token : ",token);
                 res.json({ authenData:{authenStatus:"Success",token:token}, error: {} });
                 // res.json({userData:authen.loginData,error:{}});
@@ -112,7 +115,7 @@ router.post('/mobile/login', (req, res) => {
         console.log("Result : ",authenHRStatus)
         if (authenHRStatus) {
             if (authenStatus) {
-                const token = jwt.sign(authen.loginData, "VeryFine System", { expiresIn: "10h" })
+                const token = jwt.sign(authen.loginData, process.env.SECRET_KEY, { expiresIn: "10h" })
                 //console.log("Token : ",token);
                 res.json({authenData:{authenStatus:"Success",token: token}, error: {} });
                 // res.json({userData:authen.loginData,error:{}});

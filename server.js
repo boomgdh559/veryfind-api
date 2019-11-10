@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const fs = require("fs");
-
+const dotenv = require('dotenv').config();
 var bodyParser = require('body-parser');
 const userRoutes = require('./api/route/user.js');
 const manageRoute = require("./api/route/managetranscript");
