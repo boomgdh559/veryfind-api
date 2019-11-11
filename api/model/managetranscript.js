@@ -109,14 +109,32 @@ setUploadTranscript = async (transcriptData, userid) => {
         })
         //console.log("Data : ",newUpload);
 
+
+        //var currentManageId = parseInt(newManageId.substring(6));
         var newManageId = await getLastestManageId("manageid", "managetranscript");
         var currentManageId = parseInt(newManageId.substring(6));
-        // console.log("Current : ",currentManageId)
-        var allManageData = transcriptData.map((result) => {
-            newId = universityShortName + result[0];
-            return [("manage" + currentManageId++), userid, newId, 'UPLOAD', new Date()];
-        })
 
+        generateManageId = (currentId, transcriptLength) => {
+            var allManageId = [];
+            for (i = 0; i < transcriptLength; i++) {
+                if (currentId > 9) {
+                    newIndex = "manage";
+                } else {
+                    newIndex = "manage0";
+                }
+                allManageId.push(newIndex + currentId);
+                ++currentId
+            }
+
+            return allManageId;
+        }
+
+        var allManageData = transcriptData.map((result,index) => {
+            newId = universityShortName + result[0];
+            var newIndex = generateManageId(currentManageId,transcriptData.length);
+            return [newIndex[index], userid, newId, 'UPLOAD', new Date()];
+        })
+        console.log("All Manage : ", allManageData);
         var newTranscriptStatus = newUploadTranscriptStatus.every(async (result) => {
             //console.log("Result : ", await result)
             return result;
@@ -339,7 +357,7 @@ setQRCode = async (userid, transcriptData) => {
     })
 
     var updateQRSql = "UPDATE transcript SET qrcode = ? WHERE transid like ?";
-    
+
     var updateQRStatus = allQRCode.map(async (data, index) => {
         var qrData = await data;
         return await connect.query(updateQRSql, qrData).then((result) => {
@@ -366,14 +384,14 @@ setQRCode = async (userid, transcriptData) => {
 
 }
 
-getAllUniversity = async() => {
+getAllUniversity = async () => {
     var connect = await dbconnect();
     var getAllUniversitySql = "SELECT universityname FROM university";
     const getAllUniversity = await connect.query(getAllUniversitySql).then((result) => {
-        const allUniversity = result.map((data)=>data.universityname);
+        const allUniversity = result.map((data) => data.universityname);
         connect.end().then(() => console.log("Close Connection in All University"));
         return allUniversity;
-        
+
     })
     return getAllUniversity;
 }
@@ -450,4 +468,4 @@ getDownloadTranscriptData = async (userid, transcriptid) => {
 // setUploadTranscript("vf_5")
 //setNewTranscript("vf_5", "59130500068")
 
-module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, getUniversityShortName, checkExist, getDownloadTranscriptData, getPrivateKey, getTotalDashboard,getAllUniversity };
+module.exports = { setUploadTranscript, setUpdateTranscript, searchTranscript, setQRCode, getUniversityShortName, checkExist, getDownloadTranscriptData, getPrivateKey, getTotalDashboard, getAllUniversity };
