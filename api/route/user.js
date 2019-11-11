@@ -4,6 +4,7 @@ const User = require('../model/user');
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv").config();
 const bcrypt = require('bcrypt');
+const checkAuthen = require("../middleware/authentication");
 
 router.post("/mobile/signup", (req, res) => {
     var firstname = req.body.firstname;
@@ -107,6 +108,24 @@ router.post('/web/login', (req, res) => {
 
     })()
 
+})
+
+router.get("/web/info",checkAuthen,(req,res)=>{
+    const {userData} = req;
+    if(Object.entries(userData).length !== 0){
+        res.json({userInfo:userData,error:{}})
+    }else{
+        res.json({userInfo:{},error:{status:404,message:"Not Found"}})
+    }
+})
+
+router.get("/mobile/info",checkAuthen,(req,res)=>{
+    const {userData} = req;
+    if(Object.entries(userData).length !== 0){
+        res.json({userInfo:userData,error:{}})
+    }else{
+        res.json({userInfo:{},error:{status:404,message:"Not Found"}})
+    }
 })
 
 router.post('/mobile/login', (req, res) => {
