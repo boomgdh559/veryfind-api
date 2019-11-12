@@ -19,30 +19,35 @@ const checkAuthen = require('../middleware/authentication');
 
 router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) => {
 
-    const allFile = req.files;
-    console.log("All File : ", allFile);
+    var allFile = req.files;
+    //console.log("All File : ", allFile);
     if (req.files !== undefined) {
-
+        
         var jsonData = []
         var allStudentUpload = [];
         var allStudentId = [];
         var checkDuplicateRowId = [];
-        allFile.map((file, index) => {
-            //console.log(file)
-            pathFile = file.path;
-            console.log("Path File : ", pathFile);
-            jsonFile = dataJSON.convertToJSON(pathFile, "KMUTT");
-            jsonData.push(jsonFile)
-            allStudentUpload.push([jsonFile.studentId, new Date()]);
-            allStudentId.push([jsonFile.studentId]);
-            checkDuplicateRowId.push(jsonFile.studentId);
-            // if(index > 0){
-            //   jsonData = jsonData[index-1].concat(jsonData[index]);
-            // }
+        generateAllFile = (allFile) => {
+            //console.log("In func All File : ",allFile);
+            return allFile.map((file, index) => {
+                //console.log(file)
+                pathFile = file.path;
+                console.log("Path File : ", pathFile);
+                jsonFile = dataJSON.convertToJSON(pathFile, "KMUTT");
+                jsonData.push(jsonFile)
+                allStudentUpload.push([jsonFile.studentId, new Date()]);
+                allStudentId.push([jsonFile.studentId]);
+                checkDuplicateRowId.push(jsonFile.studentId);
+                // if(index > 0){
+                //   jsonData = jsonData[index-1].concat(jsonData[index]);
+                // }
+    
+            })
 
-        })
-        console.log("All Student Id : ", allStudentId)
+        }
         
+        //console.log("All Student Id : ", allStudentId)
+
         // console.log(jsonData.map((data,index)=>data.studentId))
 
         deleteExcelFile = (file) => {
@@ -55,8 +60,8 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             })
         }
 
-        newTranscript = async (registrarProvider,id, name, degree, gpa, date, json) => {
-    
+        newTranscript = async (registrarProvider, id, name, degree, gpa, date, json) => {
+
             var account = await registrarProvider.web3.eth.getAccounts();
             var firstNoune = registrarProvider.web3.eth.getTransactionCount(account[0]);
             console.log("Account : ", account);
@@ -81,8 +86,8 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                     //     hash = "No Transaction Hash"
                     // }
                     // //console.log("Status : "+status)
-                    
-                    
+
+
 
                 })
 
@@ -92,7 +97,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
         }
 
-        addTranscript = async(jsonData) => {
+        addTranscript = async (jsonData,uploadId,duplicateId) => {
             //console.log("Here")
             jsonLength = jsonData.length;
             console.log("JSON Length : " + jsonLength)
@@ -100,7 +105,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             allHash = [];
             var privateKey = await Manage.getPrivateKey(req.userData.userid);
             var registrarProvider = RegistrarWeb3Provider(privateKey);
-            jsonData.map(async(data,index) => {
+            jsonData.map(async (data, index) => {
                 //console.log("Here 1")
 
                 id = data.studentId;
@@ -112,7 +117,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                 jsonInput = data.studentJSONData;
                 allStudentUpload[index].push(faculty);
                 //console.log("All Json Upload : index = "+index," : ",allStudentUpload);
-                newTranscript(registrarProvider,id, name, degree, gpa, date, jsonInput).then(async (result) => {
+                newTranscript(registrarProvider, id, name, degree, gpa, date, jsonInput).then(async (result) => {
                     allStatus = await result.status;
                     console.log("Status 1 : " + id + " : ", result.status);
                     try {
@@ -121,20 +126,24 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                         if (count === jsonLength) {
                             if (allStatus) {
                                 (async () => {
-                                    var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload,req.userData.userid);
-                                    var updateQRCode = await Manage.setQRCode(req.userData.userid,allStudentId);
+                                    var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, req.userData.userid);
+                                    var updateQRCode = await Manage.setQRCode(req.userData.userid, allStudentId);
                                     if (uploadDatabase && updateQRCode) {
-                                        res.json({ percent: 100, status: "success", error: {} })
+                                        if(duplicateId.length !== 0){
+                                            res.json({ percent: 100, status: "success",uploadId:uploadId,duplicateId: duplicateId ,error: {status: 405, message: "Method Not Allowed"} });
+                                        }else{
+                                            res.json({ percent: 100, status: "success",uploadId:uploadId,duplicateId: duplicateId ,error: {} })
+                                        }
                                         console.log("100 percent success")
                                         allFile.map((file) => {
                                             deleteExcelFile(file);
                                         })
                                     } else {
-                                        res.json({ percent: 100, status: "error", error: { status: 405, message: "Method Not Allowed" } })
+                                        res.json({ percent: 100, status: "error",uploadId:uploadId,duplicateId: duplicateId, error: { status: 405, message: "Method Not Allowed",} })
                                     }
                                 })()
                             } else {
-                                res.json({ percent: 100, status: "error", error: { status: 500, message: "Internal Server Error" } })
+                                res.json({ percent: 100, status: "error",uploadId:uploadId,error: { status: 500, message: "Internal Server Error" } })
                             }
 
                         }
@@ -148,7 +157,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
                 // newTranscript(id, name, degree, gpa, date, jsonInput).then((statusResult, err) => {
                 //   console.log("Here 2")
-                  
+
 
                 // });
 
@@ -164,16 +173,75 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             })
         }
 
+        deleteDuplicateExcelFile = (duplicatePath) => {
+            fs.unlink(duplicatePath, (err) => {
+                if (!err) {
+                    console.log('Delete ' + duplicatePath + ' Successful');
+                } else {
+                    console.log('Cannot Delete');
+                }
+            })
+        }
+
+        findAndRemoveAllFile = (duplicateId) => {
+            const upload = allFile.filter((obj) => {
+                return !duplicateId.includes(parseInt(obj.originalname.replace(".xlsx")));
+            });
+
+            const deleteDuplicate = allFile.filter((obj) => {
+                return duplicateId.includes(parseInt(obj.originalname.replace(".xlsx")));
+            });
+            //console.log("Delete : ",deleteDuplicate);
+            //const deleteId = deleteDuplicate.map((val)=>val.originalname);
+            // console.log("Delete : ",deleteId);
+            deleteDuplicate.map((val)=>{
+                deleteDuplicateExcelFile(val.path);
+            })
+            
+            return upload
+        }
+
         (async () => {
-            var checkDuplicateStatus = await Manage.checkExist(checkDuplicateRowId);
-            if (checkDuplicateStatus.checkStatus) {
-                addTranscript(jsonData)
-            } else {
-                res.json({ uploadStatus: {},duplicateId:checkDuplicateStatus.duplicateId, error: { status: 405, message: "Method Not Allowed" } });
-                allFile.map((file) => {
-                    deleteExcelFile(file);
-                })
+            //generateAllFile(allFile);
+            var allId = allFile.map((val)=>parseInt(val.originalname.replace(".xlsx","")));
+            console.log("All Id : ",allId);
+            //console.log("Check Duplicate : ",checkDuplicateRowId)
+            var checkDuplicateStatus = await Manage.checkExist(allId);
+            var { uploadId, duplicateId } = checkDuplicateStatus;
+            console.log("Upload : ", uploadId, "\nDuplicate : ", duplicateId);
+            if(allId.length !== 0){
+                if(uploadId.length === 0 && duplicateId.length === 0){
+                    generateAllFile(allFile);
+                    addTranscript(jsonData,uploadId,duplicateId);
+                }
+                else if (uploadId.length >= 1) {
+                    allFile = findAndRemoveAllFile(duplicateId);
+                    generateAllFile(allFile);
+                    addTranscript(jsonData,uploadId,duplicateId);
+                    // jsonData = findAndRemoveAllFile(duplicateId);
+                    // console.log("All File : ",allFile);
+                    // console.log("All Upload : ",allStudentUpload);
+                    // addTranscript(jsonData,duplicateId);
+                    //console.log("JSON Data : ",jsonData);
+                } else {
+                    res.json({ uploadStatus: {},uploadId:uploadId,duplicateId:duplicateId,error: { status: 405, message: "Method Not Allowed"} });
+                    allFile.map((file)=>{
+                        deleteExcelFile(file);
+                    })
+                }
+            }else{
+                res.json({ uploadFile: {}, error: { status: 404, message: "Not Found" } })
             }
+            
+            // if (checkDuplicateStatus.checkStatus) {
+            //     addTranscript(jsonData)
+            // } else {
+            //     res.json({ uploadStatus: {}, error: { status: 405, message: "Method Not Allowed",duplicateId:checkDuplicateStatus.duplicateId } });
+            //     allFile.map((file) => {
+            //         deleteExcelFile(file);
+            //     })
+            // }
+            
         })()
 
 
@@ -184,12 +252,12 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
 })
 
-router.get('/dashboard',checkAuthen,(req,res)=>{
-    (async() => {
+router.get('/dashboard', checkAuthen, (req, res) => {
+    (async () => {
         var allDashboardData = await Manage.getTotalDashboard();
-        res.json({totalUpload:allDashboardData.totalUpload,totalUpdate:allDashboardData.totalUpdate,error:{}});
+        res.json({ totalUpload: allDashboardData.totalUpload, totalUpdate: allDashboardData.totalUpdate, error: {} });
     })()
-    
+
 })
 
 router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
@@ -251,22 +319,32 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
 
 })
 
+// router.get("/duplicate",checkAuthen,(req,res)=>{
+
+//     (async()=>{
+//         var checkExist = await Manage.checkExist([59130500024,59130500045,59130500078]);
+//         res.json({duplicate:checkExist});
+//         console.log("Check Exist : ",checkExist);
+//     })()
+
+// })
+
 router.get("/transcripts", checkAuthen, (req, res) => {
 
     //List Id from Database
     var studentId = req.query.searchId;
-    
+
     (async () => {
         var searchtranscript = await Manage.searchTranscript(req.userData.userid, studentId);
         var getShortName = await Manage.getUniversityShortName(req.userData.userid);
         var searchStatus = searchtranscript.searchStatus;
         var searchData = searchtranscript.searchData;
         if (searchStatus) {
-            res.json({ searchData: searchData,uniShortName:getShortName, error: {} });
+            res.json({ searchData: searchData, uniShortName: getShortName, error: {} });
         } else {
             res.json({
                 searchData: searchData,
-                uniShortName:{},
+                uniShortName: {},
                 error: {
                     status: 404,
                     message: "Not Found"
@@ -294,13 +372,13 @@ router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 
 })
 
-router.get("/university",(req,res)=>{
-    (async()=>{
+router.get("/university", (req, res) => {
+    (async () => {
         var allUniversity = await Manage.getAllUniversity();
         // console.log("All : ",allUniversity);
-        res.json({allUniversity,error:{}});
+        res.json({ allUniversity, error: {} });
     })()
-    
+
 })
 router.get("/transcripts/fetchTranscript", checkAuthen, (req, res) => {
     var studentId = req.body.studentId;

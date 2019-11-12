@@ -33,6 +33,7 @@ checkExist = async (transcriptId) => {
     var checkExistSql = "select count(transid) as countrow from transcript where transid like ?";
     var countDuplicateRow = 0;
     var countDuplicateId = [];
+    var countUploadId = [];
     var checkExistStatus = transcriptId.map(async (idData, index) => {
         var allStatus = await connect.query(checkExistSql, "%" + idData).then((result) => {
             var countRow = result.map((data) => data.countrow);
@@ -41,10 +42,13 @@ checkExist = async (transcriptId) => {
             if (countRow[0] >= 1) {
                 countDuplicateId.push(idData);
                 // connect.end().then(()=>console.log("Close Connection in Check"));
-                if (++index === transcriptId.length) {
-                    connect.end().then(() => console.log("Close Connection in Check"));
-                }
                 return ++countDuplicateRow;
+            } else {
+                countUploadId.push(idData);
+            }
+
+            if (++index === transcriptId.length) {
+                connect.end().then(() => console.log("Close Connection in Check"));
             }
 
 
@@ -55,9 +59,9 @@ checkExist = async (transcriptId) => {
 
     if (await checkExistStatus[checkExistStatus.length - 1] >= 1) {
         console.log(await checkExistStatus[checkExistStatus.length - 1])
-        return { checkStatus: false, duplicateId: countDuplicateId };
+        return { checkStatus: false, uploadId: countUploadId, duplicateId: countDuplicateId };
     } else {
-        return { checkStatus: true, duplicateId: [] };
+        return { checkStatus: true, uploadId: countUploadId, duplicateId: countDuplicateId };
     }
     // return checkExistStatus;
 }
@@ -82,80 +86,79 @@ setUploadTranscript = async (transcriptData, userid) => {
         return newId
     })
 
-    var checkExistStatus = await checkExist(allId);
+    // var checkExistStatus = await checkExist(allId);
+    // var {uploadData} = checkExistStatus;
     // console.log("Check Status : ", checkExistStatus.checkStatus);
     // console.log("Check Duplicate Id : ", checkExistStatus.duplicateId);
     //console.log("All Data : ",allData)
-    if (checkExistStatus.checkStatus) {
-        var newUploadTranscriptStatus = allData.map(async (data, index) => {
-            try {
-                var allUploadStatus = await connect.query(newTranscriptSql, data).then((result) => {
-                    if (++index !== allData.length) {
-                        if (result.affectedRows >= 1) {
-                            return true;
-                        } else {
-                            return false;
-                        }
+
+    var newUploadTranscriptStatus = allData.map(async (data, index) => {
+        try {
+            var allUploadStatus = await connect.query(newTranscriptSql, data).then((result) => {
+                if (++index !== allData.length) {
+                    if (result.affectedRows >= 1) {
+                        return true;
                     } else {
-                        console.log("In Here Upload");
-                        connect.end().then(() => console.log("Close Connection in Upload"));
+                        return false;
                     }
-                })
-
-                return allUploadStatus;
-            } catch (error) {
-                return false;
-            }
-        })
-        //console.log("Data : ",newUpload);
-
-
-        //var currentManageId = parseInt(newManageId.substring(6));
-        var newManageId = await getLastestManageId("manageid", "managetranscript");
-        var currentManageId = parseInt(newManageId.substring(6));
-
-        generateManageId = (currentId, transcriptLength) => {
-            var allManageId = [];
-            for (i = 0; i < transcriptLength; i++) {
-                if (currentId > 9) {
-                    newIndex = "manage";
                 } else {
-                    newIndex = "manage0";
+                    console.log("In Here Upload");
+                    connect.end().then(() => console.log("Close Connection in Upload"));
                 }
-                allManageId.push(newIndex + currentId);
-                ++currentId
-            }
-
-            return allManageId;
-        }
-
-        var allManageData = transcriptData.map((result,index) => {
-            newId = universityShortName + result[0];
-            var newIndex = generateManageId(currentManageId,transcriptData.length);
-            return [newIndex[index], userid, newId, 'UPLOAD', new Date()];
-        })
-        console.log("All Manage : ", allManageData);
-        var newTranscriptStatus = newUploadTranscriptStatus.every(async (result) => {
-            //console.log("Result : ", await result)
-            return result;
-        })
-
-        //console.log("New Transcript Status : ", newTranscriptStatus);
-        if (newTranscriptStatus) {
-            var setManageStatus = await setNewManageTranscript(allManageData);
-            var newManageStatus = setManageStatus.every(async (result) => {
-                var status = await result;
-                return status;
-                //console.log("Result : ",await result)
             })
-            //console.log("New Management Status : ", newManageStatus);
-            return newManageStatus;
-        } else {
+
+            return allUploadStatus;
+        } catch (error) {
             return false;
         }
-    } else {
-        return { uploadDuplicate: false };
+    })
+    //console.log("Data : ",newUpload);
+
+
+    //var currentManageId = parseInt(newManageId.substring(6));
+    var newManageId = await getLastestManageId("manageid", "managetranscript");
+    var currentManageId = parseInt(newManageId.substring(6));
+
+    generateManageId = (currentId, transcriptLength) => {
+        var allManageId = [];
+        for (i = 0; i < transcriptLength; i++) {
+            if (currentId > 9) {
+                newIndex = "manage";
+            } else {
+                newIndex = "manage0";
+            }
+            allManageId.push(newIndex + currentId);
+            ++currentId
+        }
+
+        return allManageId;
     }
+
+    var allManageData = transcriptData.map((result, index) => {
+        newId = universityShortName + result[0];
+        var newIndex = generateManageId(currentManageId, transcriptData.length);
+        return [newIndex[index], userid, newId, 'UPLOAD', new Date()];
+    })
+    console.log("All Manage : ", allManageData);
+    var newTranscriptStatus = newUploadTranscriptStatus.every(async (result) => {
+        //console.log("Result : ", await result)
+        return result;
+    })
+
+    //console.log("New Transcript Status : ", newTranscriptStatus);
+    if (newTranscriptStatus) {
+        var setManageStatus = await setNewManageTranscript(allManageData);
+        var newManageStatus = setManageStatus.every(async (result) => {
+            var status = await result;
+            return status;
+            //console.log("Result : ",await result)
+        })
+        //console.log("New Management Status : ", newManageStatus);
+        return newManageStatus;
+    } else {
+        return false;
+    }
+    
 
 
 }
@@ -359,17 +362,19 @@ setQRCode = async (userid, transcriptData) => {
     var updateQRSql = "UPDATE transcript SET qrcode = ? WHERE transid like ?";
 
     var updateQRStatus = allQRCode.map(async (data, index) => {
+        //console.log("All QR Length : ",allQRCode.length);
         var qrData = await data;
         return await connect.query(updateQRSql, qrData).then((result) => {
             //console.log("All QR Code : index"," = ",index,allQRCode.length);
-            if (++index !== allQRCode.length) {
+            if (++index === allQRCode.length) {
+                connect.end().then(() => console.log("Close Connection in QR Update"));
+            } else {
                 if (result.affectedRows >= 1) {
                     return true;
                 } else {
                     return false;
                 }
-            } else {
-                connect.end().then(() => console.log("Close Connection in QR Update"));
+                
             }
 
         })
