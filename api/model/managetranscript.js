@@ -158,7 +158,7 @@ setUploadTranscript = async (transcriptData, userid) => {
     } else {
         return false;
     }
-    
+
 
 
 }
@@ -358,34 +358,42 @@ setQRCode = async (userid, transcriptData) => {
             return [addressData.pointer, "%" + transid];
         }
     })
-
+    console.log("QR Code : ", allQRCode);
     var updateQRSql = "UPDATE transcript SET qrcode = ? WHERE transid like ?";
-
-    var updateQRStatus = allQRCode.map(async (data, index) => {
-        //console.log("All QR Length : ",allQRCode.length);
-        var qrData = await data;
-        return await connect.query(updateQRSql, qrData).then((result) => {
-            //console.log("All QR Code : index"," = ",index,allQRCode.length);
-            if (++index === allQRCode.length) {
-                connect.end().then(() => console.log("Close Connection in QR Update"));
-            } else {
-                if (result.affectedRows >= 1) {
-                    return true;
+    if(allQRCode.length === allId.length){
+        var count = 0;
+        var updateQRStatus = await Promise.all(allQRCode.map(async (data, index) => {
+            //console.log("All QR Length : ",allQRCode.length);
+            var qrData = await data;
+            var allStatus = await connect.query(updateQRSql, qrData).then((result) => {
+                //console.log("All QR Code : index"," = ",index,allQRCode.length);
+                if (++count !== allQRCode.length) {
+                    //console.log("Index : ",index);
+                    if (result.affectedRows >= 1) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 } else {
-                    return false;
+                    connect.end().then(() => console.log("Close Connection in QR Update"));
                 }
-                
-            }
-
+                ++count;
+    
+            })
+            return allStatus
+    
+        }))
+    
+        // if(updateQRStatus.length === allQRCode.length){
+        var allUpdateQRStatus = updateQRStatus.every(async (result) => {
+            var status = await result;
+            return status;
         })
-    })
+        return allUpdateQRStatus;
+    }
 
-    var allUpdateQRStatus = updateQRStatus.every(async (result) => {
-        var status = await result;
-        return status;
-    })
 
-    return allUpdateQRStatus;
+    //return allUpdateQRStatus;
 
 }
 

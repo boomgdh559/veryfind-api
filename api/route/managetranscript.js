@@ -22,7 +22,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
     var allFile = req.files;
     //console.log("All File : ", allFile);
     if (req.files !== undefined) {
-        
+
         var jsonData = []
         var allStudentUpload = [];
         var allStudentId = [];
@@ -41,11 +41,11 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                 // if(index > 0){
                 //   jsonData = jsonData[index-1].concat(jsonData[index]);
                 // }
-    
+
             })
 
         }
-        
+
         //console.log("All Student Id : ", allStudentId)
 
         // console.log(jsonData.map((data,index)=>data.studentId))
@@ -97,7 +97,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
         }
 
-        addTranscript = async (jsonData,uploadId,duplicateId) => {
+        addTranscript = async (jsonData, uploadId, duplicateId) => {
             //console.log("Here")
             jsonLength = jsonData.length;
             console.log("JSON Length : " + jsonLength)
@@ -129,21 +129,21 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
                                     var uploadDatabase = await Manage.setUploadTranscript(allStudentUpload, req.userData.userid);
                                     var updateQRCode = await Manage.setQRCode(req.userData.userid, allStudentId);
                                     if (uploadDatabase && updateQRCode) {
-                                        if(duplicateId.length !== 0){
-                                            res.json({ percent: 100, status: "success",uploadId:uploadId,duplicateId: duplicateId ,error: {status: 405, message: "Method Not Allowed"} });
-                                        }else{
-                                            res.json({ percent: 100, status: "success",uploadId:uploadId,duplicateId: duplicateId ,error: {} })
+                                        if (duplicateId.length !== 0) {
+                                            res.json({ percent: 100, status: "success", uploadId: uploadId, duplicateId: duplicateId, error: { status: 405, message: "Method Not Allowed" } });
+                                        } else {
+                                            res.json({ percent: 100, status: "success", uploadId: uploadId, duplicateId: duplicateId, error: {} })
                                         }
                                         console.log("100 percent success")
                                         allFile.map((file) => {
                                             deleteExcelFile(file);
                                         })
                                     } else {
-                                        res.json({ percent: 100, status: "error",uploadId:uploadId,duplicateId: duplicateId, error: { status: 405, message: "Method Not Allowed",} })
+                                        res.json({ percent: 100, status: "error", uploadId: uploadId, duplicateId: duplicateId, error: { status: 405, message: "Method Not Allowed", } })
                                     }
                                 })()
                             } else {
-                                res.json({ percent: 100, status: "error",uploadId:uploadId,error: { status: 500, message: "Internal Server Error" } })
+                                res.json({ percent: 100, status: "error", uploadId: uploadId, error: { status: 500, message: "Internal Server Error" } })
                             }
 
                         }
@@ -194,45 +194,45 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             //console.log("Delete : ",deleteDuplicate);
             //const deleteId = deleteDuplicate.map((val)=>val.originalname);
             // console.log("Delete : ",deleteId);
-            deleteDuplicate.map((val)=>{
+            deleteDuplicate.map((val) => {
                 deleteDuplicateExcelFile(val.path);
             })
-            
+
             return upload
         }
 
         (async () => {
             //generateAllFile(allFile);
-            var allId = allFile.map((val)=>parseInt(val.originalname.replace(".xlsx","")));
-            console.log("All Id : ",allId);
+            var allId = allFile.map((val) => parseInt(val.originalname.replace(".xlsx", "")));
+            console.log("All Id : ", allId);
             //console.log("Check Duplicate : ",checkDuplicateRowId)
             var checkDuplicateStatus = await Manage.checkExist(allId);
             var { uploadId, duplicateId } = checkDuplicateStatus;
             console.log("Upload : ", uploadId, "\nDuplicate : ", duplicateId);
-            if(allId.length !== 0){
-                if(uploadId.length === 0 && duplicateId.length === 0){
+            if (allId.length !== 0) {
+                if (uploadId.length === 0 && duplicateId.length === 0) {
                     generateAllFile(allFile);
-                    addTranscript(jsonData,uploadId,duplicateId);
+                    addTranscript(jsonData, uploadId, duplicateId);
                 }
                 else if (uploadId.length >= 1) {
                     allFile = findAndRemoveAllFile(duplicateId);
                     generateAllFile(allFile);
-                    addTranscript(jsonData,uploadId,duplicateId);
+                    addTranscript(jsonData, uploadId, duplicateId);
                     // jsonData = findAndRemoveAllFile(duplicateId);
                     // console.log("All File : ",allFile);
                     // console.log("All Upload : ",allStudentUpload);
                     // addTranscript(jsonData,duplicateId);
                     //console.log("JSON Data : ",jsonData);
                 } else {
-                    res.json({ uploadStatus: {},uploadId:uploadId,duplicateId:duplicateId,error: { status: 405, message: "Method Not Allowed"} });
-                    allFile.map((file)=>{
+                    res.json({ uploadStatus: {}, uploadId: uploadId, duplicateId: duplicateId, error: { status: 405, message: "Method Not Allowed" } });
+                    allFile.map((file) => {
                         deleteExcelFile(file);
                     })
                 }
-            }else{
+            } else {
                 res.json({ uploadFile: {}, error: { status: 404, message: "Not Found" } })
             }
-            
+
             // if (checkDuplicateStatus.checkStatus) {
             //     addTranscript(jsonData)
             // } else {
@@ -241,7 +241,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             //         deleteExcelFile(file);
             //     })
             // }
-            
+
         })()
 
 
@@ -290,20 +290,23 @@ router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
             if (searchStatus) {
                 account = await registrarProvider.web3.eth.getAccounts();
                 try {
-                    await registrarProvider.transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }, (err) => {
+                    await registrarProvider.transcript.methods.editJSONTranscript(id, name, degree, gpa, dateGrad, jsonData).send({ from: account[0] }).then((receipt) => {
                         (async () => {
                             var updateDatabase = await Manage.setUpdateTranscript(id, req.userData.userid);
-                            if (!err) {
+
+                            if (receipt.status) {
                                 if (updateDatabase) {
                                     res.json({ updateStatus: true, error: {} });
                                     console.log("success")
                                 } else {
                                     res.json({ updateStatus: {}, error: { status: 405, message: "Method Not Allowed" } });
                                 }
-
                             } else {
                                 res.json({ updateStatus: {}, error: { status: 502, message: "Bad Gateway" } });
                             }
+
+                            // res.json({ updateStatus: {}, error: { status: 502, message: "Bad Gateway" } });
+
                         })()
                     })
                 } catch (err) {
