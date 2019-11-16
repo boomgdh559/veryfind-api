@@ -378,7 +378,9 @@ router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 router.get("/university", (req, res) => {
     (async () => {
         var allUniversity = await Manage.getAllUniversity();
-        // console.log("All : ",allUniversity);
+        allUniversity = allUniversity.map((university) => {
+            return {value:university,label:university}
+        }) 
         res.json({ allUniversity, error: {} });
     })()
 
