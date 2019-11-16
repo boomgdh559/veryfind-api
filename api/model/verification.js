@@ -37,9 +37,12 @@ getTransId = async (transcriptId) => {
 }
 getAllCompany = async() => {
     var connect = await dbconnect();
-    var getAllCompanySql = "SELECT companyname FROM company";
+    var getAllCompanySql = "SELECT companyregisnumber,companyname FROM company";
     const getAllCompany = await connect.query(getAllCompanySql).then((result) => {
-        const allCompany = result.map((data)=>data.companyname);
+        const allCompany = result.map((data)=>{
+            return {name:data.companyname,regis:data.companyregisnumber}
+        });
+        //const allCompanyRegis = result.map((data)=>data.companyregisnumber);
         connect.end().then(() => console.log("Close Connection in All Company"));
         return allCompany;
         
