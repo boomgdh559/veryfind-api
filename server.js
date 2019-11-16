@@ -10,7 +10,7 @@ const userRoutes = require('./api/route/user.js');
 const manageRoute = require("./api/route/managetranscript");
 const verificationRoute = require("./api/route/verification");
 
-app.options('*', cors()) // include before other routes
+app.use(cors()) // include before other routes
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw({ type: 'application/x-www-form-urlencoded' }))
