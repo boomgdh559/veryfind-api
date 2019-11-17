@@ -45,21 +45,44 @@ getLastestUserId = async (attribute, table) => {
 checkUserExist = async (firstname, surname, email) => {
 
     var connect = await dbconnect();
-    var checkUserSql = "select count(*) as userExist from user where firstname like ? and surname like ? and email = ?";
-    var checkUserData = [firstname, surname, email];
-    return await connect.query(checkUserSql, checkUserData).then((result) => {
+    var checkUserNameSql = "select count(*) as userExist from user where firstname like ? and surname like ?";
+    var checkEmailSql = "select count(*) as emailExist from user where email = ?";
+    var checkUserData = [firstname, surname];
+    var checkName = await connect.query(checkUserNameSql, checkUserData).then((result) => {
         const data = result.map((val)=>val.userExist);
+        //connect.end().then(() => console.log("Close Connection in Check User Name Exist"));
         // console.log("Data : ",data)
-        var returnStatus = {};
+        //var returnStatus = {};
         if (data[0] > 0) {
-            returnStatus = { checkUserExist: true };
+            return true
+            // returnStatus = { checkUserExist: true };
         } else {
-            returnStatus = { checkUserExist: false };
+            return false
+            //returnStatus = { checkUserExist: false };
         }
-        connect.end().then(() => console.log("Close Connection in Check User Exist"));
-        return returnStatus;
+        
+        //return returnStatus;
 
     })
+    if(!checkName){
+        var checkEmail = await connect.query(checkEmailSql,email).then((result)=> {
+            const data = result.map((val)=>val.emailExist);
+            var returnStatus = {};
+            if(data[0] > 0){
+                returnStatus = { checkUserExist: true };
+            }else{
+                returnStatus = { checkUserExist: false };
+            }
+
+            return returnStatus;
+        })
+        connect.end().then(() => console.log("Close Connection in Check User Exist"));
+        return checkEmail;
+    }else{
+        connect.end().then(() => console.log("Close Connection in Check User Exist"));
+        return {checkUserExist : true}
+    }
+    
 
 }
 
@@ -251,7 +274,7 @@ checkRegistrarUser = async (email, password) => {
 (async () => {
     //console.log(await checkHRUser("saknarong@veryfine.com","letitgo123"));
     //console.log(await checkRegistrarUser("sineenad@veryfind.com","tanja"));
-    //console.log(await checkUserExist("Purich","Sangprasert","purich@veryfine.com"));
+    //console.log(await checkUserExist("Krairat","Rianrou","krairat@veryfine.com"));
     //console.log("Userid : ", await getLastestUserId("userid", "user"));
     // console.log("HR Result : ",await setHumanResourceUser("Saknarong", "Pongthonglang", "Male", new Date(1997, 8, 12), "012-0345678", "saknarong@veryfind.com",
     // "letitgo123", new Date(), "0105558193432", "Human Resource's Staff"));
