@@ -70,7 +70,7 @@ getAllVerifyTranscript = async (userid) => {
 getVerifyHistory = async (userid) => {
     var connect = await dbconnect();
     var getAllTranscript = await getAllVerifyTranscript(userid);
-    var getVerifyHistorySql = "SELECT verifyid,transid,userid,verifydate FROM `verification` where userid = ? and transid like ? order by length(verifyid),verifyid";
+    var getVerifyHistorySql = "SELECT verifyid,transid,userid,DATE_FORMAT(verifydate,"+"'%M %d,%Y %T'"+") as dateFormat FROM `verification` where userid = ? and transid like ? order by length(verifyid),verifyid";
     if (getAllTranscript.length >= 1) {
         var allHistoryData = [];
         var allVerifyHistory = getAllTranscript.map(async (data, index) => {
