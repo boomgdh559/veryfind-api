@@ -45,12 +45,13 @@ getLastestUserId = async (attribute, table) => {
 checkUserExist = async (firstname, surname, email) => {
 
     var connect = await dbconnect();
-    var checkUserSql = "select firstname,surname,email from user where firstname like ? and surname like ? and email = ?"
+    var checkUserSql = "select count(*) as userExist from user where firstname like ? and surname like ? and email = ?";
     var checkUserData = [firstname, surname, email];
     return await connect.query(checkUserSql, checkUserData).then((result) => {
-        const data = result;
+        const data = result.map((val)=>val.userExist);
+        // console.log("Data : ",data)
         var returnStatus = {};
-        if (data.length >= 1) {
+        if (data[0] > 0) {
             returnStatus = { checkUserExist: true };
         } else {
             returnStatus = { checkUserExist: false };
@@ -73,6 +74,7 @@ findCompanyIdByCompanyRegister = async (companyRegister) => {
     })
     return companyId;
 }
+
 
 findUniversityIdByUniversityName = async (universityName) => {
     var connect = await dbconnect();
@@ -99,38 +101,41 @@ setHumanResourceUser = async (firstname, surname, gender, dob, tel, email, passw
     var newUserSql = "INSERT INTO user (userid,firstname,surname,gender,dob,tel,email,password,dateofregister) VALUES (?,?,?,?,?,?,?,?,?)";
     var newUser = [newUserId, firstname, surname, gender, dob, tel, email, password, dateRegister]
     //var newHRUserSql = "INSERT INTO humanresourcestaff (userid,companyid,position) VALUES (?,?,?)"
-    setUserStatus = await connect.query(newUserSql, newUser).then((result) => {
-        if (result.affectedRows >= 1) {
-            console.log(result.affectedRows + " User is created")
-            // connect.end().then(()=>console.log("Close Connection in User signup"));
-            return true;
+    
+        setUserStatus = await connect.query(newUserSql, newUser).then((result) => {
+            if (result.affectedRows >= 1) {
+                console.log(result.affectedRows + " User is created")
+                // connect.end().then(()=>console.log("Close Connection in User signup"));
+                return true;
+            } else {
+                return false;
+            }
+        })
+
+        if (setUserStatus) {
+            var newHRSql = "INSERT INTO humanresourcestaff (userid,companyid,position) VALUES (?,?,?)";
+            var newHRUser = [newUserId, companyid, position];
+            try {
+                setHRStatus = await connect.query(newHRSql, newHRUser).then((result) => {
+                    if (result.affectedRows >= 1) {
+                        console.log(result.affectedRows + " HR's user is created")
+                        connect.end().then(() => console.log("Close Connection in Create User and HR signup"));
+                        return true;
+                    } else {
+                        return false;
+                    }
+                })
+                return setHRStatus
+            }
+
+            catch (err) {
+                console.error(err);
+            }
         } else {
-            return false;
+            return false
         }
-    })
+    
 
-    if (setUserStatus) {
-        var newHRSql = "INSERT INTO humanresourcestaff (userid,companyid,position) VALUES (?,?,?)";
-        var newHRUser = [newUserId, companyid, position];
-        try {
-            setHRStatus = await connect.query(newHRSql, newHRUser).then((result) => {
-                if (result.affectedRows >= 1) {
-                    console.log(result.affectedRows + " HR's user is created")
-                    connect.end().then(() => console.log("Close Connection in Create User and HR signup"));
-                    return true;
-                } else {
-                    return false;
-                }
-            })
-            return setHRStatus;
-        }
-
-        catch (err) {
-            console.error(err);
-        }
-    } else {
-        return false
-    }
 
 
 }
@@ -183,7 +188,7 @@ authenticationExist = async (email, password) => {
             var data = result[0];
             connect.end().then(() => console.log("Close Connection in Login"));
             var checkPassword = await bcrypt.compare(password, data.password);
-            console.log("Check Password : ",checkPassword)
+            console.log("Check Password : ", checkPassword)
             if (checkPassword) {
                 return {
                     loginStatus: true, loginData: {
@@ -246,15 +251,15 @@ checkRegistrarUser = async (email, password) => {
 (async () => {
     //console.log(await checkHRUser("saknarong@veryfine.com","letitgo123"));
     //console.log(await checkRegistrarUser("sineenad@veryfind.com","tanja"));
-    //console.log(await checkUserExist("jurich","Sangprasert","purich@veryfine.com"));
+    //console.log(await checkUserExist("Purich","Sangprasert","purich@veryfine.com"));
     //console.log("Userid : ", await getLastestUserId("userid", "user"));
     // console.log("HR Result : ",await setHumanResourceUser("Saknarong", "Pongthonglang", "Male", new Date(1997, 8, 12), "012-0345678", "saknarong@veryfind.com",
     // "letitgo123", new Date(), "0105558193432", "Human Resource's Staff"));
 
     // console.log("Registrar Result : ",await setUniversityRegistrarUser("Sineenad", "Junmookda", "Female", new Date(1998, 5, 1), "012-0345678", "sineenad@veryfind.com",
     // "tanja", new Date(), "King", "34567891231", "University Registrar's Staff", "0xB4F3e535D81e3dD7CEccDA0A626521D149E2b98d"));
-    //console.log(await findUniversityIdByUniversityName("King"));
+    //console.log(await findCompanyIdByCompanyRegister("0105558193432"))
     //console.log("Login : ", await authenticationExist("purich@veryfine.com","boomgdh559"));
 
 })()
-module.exports = { setHumanResourceUser, setUniversityRegistrarUser, authenticationExist, checkUserExist, checkHRUser, checkRegistrarUser }
+module.exports = { setHumanResourceUser, setUniversityRegistrarUser, authenticationExist, checkUserExist, checkHRUser, checkRegistrarUser, findCompanyIdByCompanyRegister }
