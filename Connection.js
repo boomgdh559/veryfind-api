@@ -60,7 +60,11 @@ const RegistrarWeb3Provider = (mnemonic) => {
 // showAccount = async () => {
 //     var hrprovider = HRWeb3Provider();
 //     var web3 = hrprovider.web3;
-//     console.log("Account : " + await web3.eth.getAccounts());
+//     var account = await web3.eth.getAccounts();
+//     if(account !== undefined){
+//         console.log("Account : " + await web3.eth.getBalance(account[0]));
+//     }
+   
 // }
 
 // showAccount();

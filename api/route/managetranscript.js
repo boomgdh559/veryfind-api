@@ -63,10 +63,12 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
         newTranscript = async (registrarProvider, id, name, degree, gpa, date, json) => {
 
             var account = await registrarProvider.web3.eth.getAccounts();
-            var firstNoune = registrarProvider.web3.eth.getTransactionCount(account[0]);
-            console.log("Account : ", account);
-            console.log("Nounce : ", await firstNoune);
+            //var balance = await registrarProvider.web3.eth.getBalance(account[0]);
+            //var firstNoune = registrarProvider.web3.eth.getTransactionCount(account[0]);
+            //console.log("Account : ", account);
+            //console.log("Nounce : ", await firstNoune);
             try {
+                
                 return await registrarProvider.transcript.methods.addTranscript(id, name, degree, gpa, date, json).send({ from: account[0] }).then((receipt) => {
                     console.log("Receipt : ", receipt.status);
                     if (receipt.status) {
@@ -105,6 +107,8 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
             allHash = [];
             var privateKey = await Manage.getPrivateKey(req.userData.userid);
             var registrarProvider = RegistrarWeb3Provider(privateKey);
+            //var account = await registrarProvider.eth.getAccounts();
+            //var balance = await registrarProvider.eth.getBalance(account[0]);
             jsonData.map(async (data, index) => {
                 //console.log("Here 1")
 
@@ -258,6 +262,22 @@ router.get('/dashboard', checkAuthen, (req, res) => {
         res.json({ totalUpload: allDashboardData.totalUpload, totalUpdate: allDashboardData.totalUpdate, error: {} });
     })()
 
+})
+
+router.get('/balance',checkAuthen,(req,res)=>{
+    //console.log("Balance")
+    (async() => {
+        console.log("Balance")
+        var privateKey = await Manage.getPrivateKey(req.userData.userid);
+        var registrarProvider = RegistrarWeb3Provider(privateKey);
+        var account = await registrarProvider.web3.eth.getAccounts();
+        var balance = await registrarProvider.web3.eth.getBalance(account[0]);
+        if(balance > 3000000000000000000){
+            res.json({balanceStatus:true,error:{}});
+        }else{
+            res.json({balanceStatus:false,error:{status:"405",message:"Balance is not enough!"}});
+        }
+    })()
 })
 
 router.put("/transcripts/:studentId", checkAuthen, (req, res) => {
