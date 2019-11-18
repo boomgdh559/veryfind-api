@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const checkAuthen = require('../middleware/authentication');
 
-router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) => {
+router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res,next) => {
 
     var allFile = req.files;
     //console.log("All File : ", allFile);
@@ -256,7 +256,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res) =
 
 })
 
-router.get('/dashboard', checkAuthen, (req, res) => {
+router.get('/dashboard', checkAuthen, (req, res,next) => {
     (async () => {
         var allDashboardData = await Manage.getTotalDashboard();
         res.json({ totalUpload: allDashboardData.totalUpload, totalUpdate: allDashboardData.totalUpdate, error: {} });

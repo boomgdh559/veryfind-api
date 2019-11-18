@@ -6,7 +6,7 @@ const dotenv = require("dotenv").config();
 const bcrypt = require('bcrypt');
 const checkAuthen = require("../middleware/authentication");
 
-router.post("/mobile/signup", (req, res) => {
+router.post("/mobile/signup", (req, res,next) => {
     var firstname = req.body.firstname;
     var surname = req.body.surname;
     var gender = req.body.gender;
@@ -46,7 +46,7 @@ router.post("/mobile/signup", (req, res) => {
 
 })
 
-router.post("/web/signup", (req, res) => {
+router.post("/web/signup", (req, res,next) => {
     var firstname = req.body.firstname;
     var surname = req.body.surname;
     var gender = req.body.gender;
@@ -83,7 +83,7 @@ router.post("/web/signup", (req, res) => {
 
 })
 
-router.post('/web/login', (req, res) => {
+router.post('/web/login', (req, res,next) => {
     var email = req.body.email;
     var password = req.body.password;
     (async () => {

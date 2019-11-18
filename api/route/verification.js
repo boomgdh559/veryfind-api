@@ -5,7 +5,7 @@ const hrProvider = HRWeb3Provider();
 const Verify = require("../model/verification");
 const checkAuthen = require('../middleware/authentication');
 
-router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
+router.get("/verify/:verifyAddress", checkAuthen, (req, res,next) => {
     verifyTranscript = async (address) => {
         try {
 
@@ -79,7 +79,7 @@ router.get("/verify/:verifyAddress", checkAuthen, (req, res) => {
 
 })
 
-router.get("/verify", checkAuthen, (req, res) => {
+router.get("/verify", checkAuthen, (req, res,next) => {
     (async () => {
         //console.log("User Id : ",req.userData.userid)
         var allHistory = await Verify.getVerifyHistory(req.userData.userid);
@@ -95,7 +95,7 @@ router.get("/verify", checkAuthen, (req, res) => {
     })()
 })
 
-router.get("/company",(req,res)=>{
+router.get("/company",(req,res,next)=>{
     (async()=>{
         const allCompany = await Verify.getAllCompany();
         //var {allCompanyName,allCompanyRegis} = allCompany
