@@ -417,7 +417,7 @@ router.get("/university", (req, res) => {
         var {fullNameUni,shortNameUni} = allUniversity;
         //console.log(allUniversity)
         universityForm = fullNameUni.map((fullName,index) =>{
-            return {value:fullName,label:`${shortNameUni[index]} | ${fullName}`}
+            return {value:fullName,label:`${shortNameUni[index]} (${fullName})`}
         })
         res.json({allUniversity: universityForm, error: {} });
     })()
