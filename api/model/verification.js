@@ -127,7 +127,7 @@ getLastestVerifyId = async (attribute, table) => {
                 var index2 = "verify";
                 var returnId = "";
                 var numberInt = parseInt(numberOrder);
-                console.log("Number Int : ", numberOrder)
+                //console.log("Number Int : ", numberOrder)
                 //console.log("Number : ", result);
                 if (numberInt >= 9) {
                     returnId = index2 + (++numberInt);
