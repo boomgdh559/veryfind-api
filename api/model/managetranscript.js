@@ -296,7 +296,7 @@ searchTranscript = async (userid, studentId) => {
 
     var connect = await dbconnect();
     var getShortName = await getUniversityShortName(userid);
-    var searchStudentId = getShortName + "%" + studentId + "%";
+    var searchStudentId = getShortName + studentId + "%";
 
     //ALL TRANSCRIPT SQL
     //select m1.transid,m1.managestatus,m1.managedate from managetranscript m1 left join managetranscript m2 on (m1.transid = m2.transid and m1.manageid<m2.manageid) WHERE m2.manageid is null order by m1.transid

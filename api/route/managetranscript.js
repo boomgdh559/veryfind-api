@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const checkAuthen = require('../middleware/authentication');
 
-router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res,next) => {
+router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res, next) => {
 
     var allFile = req.files;
     //console.log("All File : ", allFile);
@@ -68,7 +68,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res,ne
             //console.log("Account : ", account);
             //console.log("Nounce : ", await firstNoune);
             try {
-                
+
                 return await registrarProvider.transcript.methods.addTranscript(id, name, degree, gpa, date, json).send({ from: account[0] }).then((receipt) => {
                     console.log("Receipt : ", receipt.status);
                     if (receipt.status) {
@@ -256,7 +256,7 @@ router.post("/transcripts", checkAuthen, upload.array('excelFile'), (req, res,ne
 
 })
 
-router.get('/dashboard', checkAuthen, (req, res,next) => {
+router.get('/dashboard', checkAuthen, (req, res, next) => {
     (async () => {
         var allDashboardData = await Manage.getTotalDashboard();
         res.json({ totalUpload: allDashboardData.totalUpload, totalUpdate: allDashboardData.totalUpdate, error: {} });
@@ -264,18 +264,18 @@ router.get('/dashboard', checkAuthen, (req, res,next) => {
 
 })
 
-router.get('/balance',checkAuthen,(req,res)=>{
+router.get('/balance', checkAuthen, (req, res) => {
     //console.log("Balance")
-    (async() => {
+    (async () => {
         console.log("Balance")
         var privateKey = await Manage.getPrivateKey(req.userData.userid);
         var registrarProvider = RegistrarWeb3Provider(privateKey);
         var account = await registrarProvider.web3.eth.getAccounts();
         var balance = await registrarProvider.web3.eth.getBalance(account[0]);
-        if(balance > 3000000000000000000){
-            res.json({balanceStatus:true,error:{}});
-        }else{
-            res.json({balanceStatus:false,error:{status:"405",message:"Balance is not enough!"}});
+        if (balance > 3000000000000000000) {
+            res.json({ balanceStatus: true, error: {} });
+        } else {
+            res.json({ balanceStatus: false, error: { status: "405", message: "Balance is not enough!" } });
         }
     })()
 })
@@ -356,14 +356,29 @@ router.get("/transcripts", checkAuthen, (req, res) => {
 
     //List Id from Database
     var studentId = req.query.searchId;
-
+    var checkNumberEmpty = (studentId) => {
+        return !isNaN(studentId);
+    }
     (async () => {
-        var searchtranscript = await Manage.searchTranscript(req.userData.userid, studentId);
-        var getShortName = await Manage.getUniversityShortName(req.userData.userid);
-        var searchStatus = searchtranscript.searchStatus;
-        var searchData = searchtranscript.searchData;
-        if (searchStatus) {
-            res.json({ searchData: searchData, uniShortName: getShortName, error: {} });
+        //console.log(`${studentId} : `+checkNumberEmpty(studentId));
+        if (checkNumberEmpty(studentId)) {
+            var searchtranscript = await Manage.searchTranscript(req.userData.userid, studentId);
+            var getShortName = await Manage.getUniversityShortName(req.userData.userid);
+            var searchStatus = searchtranscript.searchStatus;
+            var searchData = searchtranscript.searchData;
+
+            if (searchStatus) {
+                res.json({ searchData: searchData, uniShortName: getShortName, error: {} });
+            } else {
+                res.json({
+                    searchData: searchData,
+                    uniShortName: {},
+                    error: {
+                        status: 404,
+                        message: "Not Found"
+                    }
+                });
+            }
         } else {
             res.json({
                 searchData: searchData,
@@ -374,6 +389,7 @@ router.get("/transcripts", checkAuthen, (req, res) => {
                 }
             });
         }
+
     })()
 
 
@@ -399,8 +415,8 @@ router.get("/university", (req, res) => {
     (async () => {
         var allUniversity = await Manage.getAllUniversity();
         allUniversity = allUniversity.map((university) => {
-            return {value:university,label:university}
-        }) 
+            return { value: university, label: university }
+        })
         res.json({ allUniversity, error: {} });
     })()
 
