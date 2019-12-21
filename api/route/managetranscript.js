@@ -414,10 +414,12 @@ router.get("/transcripts/:studentId", checkAuthen, (req, res) => {
 router.get("/university", (req, res) => {
     (async () => {
         var allUniversity = await Manage.getAllUniversity();
-        allUniversity = allUniversity.map((university) => {
-            return { value: university, label: university }
+        var {fullNameUni,shortNameUni} = allUniversity;
+        //console.log(allUniversity)
+        universityForm = fullNameUni.map((fullName,index) =>{
+            return {value:fullName,label:`${shortNameUni[index]} | ${fullName}`}
         })
-        res.json({ allUniversity, error: {} });
+        res.json({allUniversity: universityForm, error: {} });
     })()
 
 })

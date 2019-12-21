@@ -399,11 +399,12 @@ setQRCode = async (userid, transcriptData) => {
 
 getAllUniversity = async () => {
     var connect = await dbconnect();
-    var getAllUniversitySql = "SELECT universityname FROM university";
+    var getAllUniversitySql = "SELECT universityname,universityshortname FROM university";
     const getAllUniversity = await connect.query(getAllUniversitySql).then((result) => {
         const allUniversity = result.map((data) => data.universityname);
+        const allShortUniversity = result.map((data) => data.universityshortname);
         connect.end().then(() => console.log("Close Connection in All University"));
-        return allUniversity;
+        return {fullNameUni : allUniversity,shortNameUni:allShortUniversity};
 
     })
     return getAllUniversity;
